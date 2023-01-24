@@ -1,0 +1,38 @@
+[
+  {
+    "title": "Computadora",
+    "description": "Producto de Tecnologia, PC",
+    "price": 300000,
+    "thumbnail": "https://i.ibb.co/VLXzNRj/pc.png",
+    "code": 1000,
+    "stock": 20,
+    "id": 1
+  },
+  {
+    "title": "Monitor",
+    "description": "Producto de Tecnologia, Monitor 144hz HD",
+    "price": 100000,
+    "thumbnail": "https://i.ibb.co/vLHwSfS/monitor.png",
+    "code": 1001,
+    "stock": 25,
+    "id": 2
+  },
+  {
+    "title": "Teclado",
+    "description": "Periferico",
+    "price": 10000,
+    "thumbnail": "https://i.ibb.co/YLgddTW/teclado.png",
+    "code": 1002,
+    "stock": 30,
+    "id": 3
+  },
+  {
+    "title": "Mouse",
+    "description": "Periferico",
+    "price": 9000,
+    "thumbnail": "https://i.ibb.co/6PDGPqC/mouse.png",
+    "code": 1003,
+    "stock": 10,
+    "id": 4
+  }
+]
