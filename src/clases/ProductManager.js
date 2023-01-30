@@ -51,9 +51,9 @@ export class ProductManager {
         if (await this.#validateProduct(product)) {
             products.push(product);
             await fs.promises.writeFile(this.path, JSON.stringify(products, null, '\t'), 'utf-8')
-            return "Producto agregado con exito";
+            return "✅ Producto agregado con exito ✅";
         } else {
-            return "No se pudo agregar el producto";
+            return "❌ No se pudo agregar el producto ❌";
         }
     }
 
@@ -70,20 +70,32 @@ export class ProductManager {
         return "Producto eliminado con exito";
     }
 
-    async updateProduct(id, product) {
-        const products = await this.getProducts();
-        products.forEach((prod) => {
-            if (prod.id === id) {
-                prod.category = product.category
-                prod.name = product.name
-                prod.price = products.price
-                prod.description = product.description
-                prod.image = product.image
-                prod.code = product.code
-                prod.stock = product.stock
+    async updateProduct(id, field, value) {
+        let estado = await this.getFile();
+        const result = estado.find((x) => x.id === id);
+        const restEstado = estado.filter((x) => x.id != id);
+        result[field] = value;
+        let concatenado = restEstado.concat(result);
+
+        if (!id || !field || !value) {
+            console.log("→ → → Error : Deben completarse todos los campos");
+        } else {
+            fs.promises.writeFile(this.path, JSON.stringify(concatenado));
+            console.log(`ID ${id} modificado correctamente`);
+        }
+    }
+
+    async getFile() {
+        try {
+            if (fs.existsSync(this.path)) {
+                const productos = await fs.promises.readFile(this.path, "utf-8");
+                const productosJS = JSON.parse(productos);
+                return productosJS;
+            } else {
+                return [];
             }
-        })
-        await fs.promises.writeFile(this.path, JSON.stringify(products))
-        return 'Producto editado correctamente'
+        } catch (error) {
+            console.log(" → → → CA ERROR!", error);
+        }
     }
 }

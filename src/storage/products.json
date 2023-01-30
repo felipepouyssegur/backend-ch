@@ -6,6 +6,8 @@
     "thumbnail": "https://i.ibb.co/VLXzNRj/pc.png",
     "code": 1000,
     "stock": 20,
+    "category": "Tecnologia",
+    "status": true,
     "id": 1
   },
   {
@@ -15,6 +17,8 @@
     "thumbnail": "https://i.ibb.co/vLHwSfS/monitor.png",
     "code": 1001,
     "stock": 25,
+    "category": "Tecnologia",
+    "status": true,
     "id": 2
   },
   {
@@ -24,6 +28,8 @@
     "thumbnail": "https://i.ibb.co/YLgddTW/teclado.png",
     "code": 1002,
     "stock": 30,
+    "category": "Tecnologia",
+    "status": true,
     "id": 3
   },
   {
@@ -33,6 +39,19 @@
     "thumbnail": "https://i.ibb.co/6PDGPqC/mouse.png",
     "code": 1003,
     "stock": 10,
+    "category": "Tecnologia",
+    "status": true,
     "id": 4
+  },
+  {
+    "title": "Auriculares",
+    "description": "Auriculares Gamer Inalambricos",
+    "price": 25000,
+    "code": 1004,
+    "status": true,
+    "stock": 10,
+    "category": "Tecnologia",
+    "thumbnails": "imagen",
+    "id": 5
   }
 ]

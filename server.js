@@ -1,5 +1,11 @@
 import express from 'express'
 import { ProductManager } from './src/clases/ProductManager.js';
+import { __dirname } from './utils.js'
+import handlebars from 'express-handlebars'
+
+import productsRouter from './src/routes/products.router.js';
+import cartRouter from './src/routes/cart.router.js'
+
 
 const pm = new ProductManager('./src/storage/products.json');
 
@@ -9,6 +15,38 @@ const app = express()
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+
+/* creamos dirname (path absoluto) */
+
+app.use(express.static(__dirname + 'public')) /* forma para decirle al sv que puede acceder a public */
+
+
+
+
+/* motor de plantilla (handlebars) */
+
+/* app.engine('handlebars', handlebars.engine())
+app.set('views', __dirname + '/src/views')
+app.set('view engine', 'handlebars')
+
+app.get('/', (req, res) => {
+    res.render('vista1')
+})
+
+app.get('/vista2', (req, res) => {
+    res.render('vista2')
+}) */
+
+
+
+/* ROUTER */
+
+app.use('/api/products', productsRouter)
+app.use('/api/cart', cartRouter)
+
+
+/* SERVER */
 
 app.listen(8080, () => {
     console.log('-----------------------------------------------------------------------')
@@ -25,28 +63,6 @@ app.get('/', (req, res) => {
     res.send(message)
 })
 
-/* getProducts para mostrar todos mis productos */
-
-app.get('/products', async (req, res) => {
-    const { limit } = req.query
-    const products = await pm.getProducts(parseInt())
-    const productosObtenidos = products.slice(0, limit)
-    res.json({ message: 'Estos son los productos obtenidos:', productosObtenidos })
-})
-
-
-/* getProductsById, verifico que exista id*/
-
-app.get('/products/:idProducts', async (req, res) => {
-    const { idProducts } = req.params
-    const id = parseInt(idProducts)
-    const product = await pm.getProductById(id)
-    if (product) {
-        res.json({ message: `Producto con id ${id} encontrado`, product })
-    } else {
-        res.json('No se encontro ningun producto')
-    }
-})
 
 
 
