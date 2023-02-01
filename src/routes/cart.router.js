@@ -1,45 +1,35 @@
 import { Router } from "express";
 import CartManager from "../clases/CartManager.js";
 
+const routerCart = Router();
+const cm = new CartManager("./src/storage/carts.json");
 
-const cm = new CartManager();
-const router = Router()
+routerCart.post("/", async (req, res) => {
+    const cartId = await cm.createCart();
+    res.status(200).json(cartId);
+});
 
-/* GetPurchase */
-router.get('/', async (req, res) => {
-    let cart = await cm.getPurchases(parseInt());
-    res.json(cart)
-})
+routerCart.get("/:idCart", async (req, res) => {
+    const { idCart } = req.params;
+    const id = parseInt(idCart);
+    const cart = await cm.getCart(id);
+    if (cart) {
+        const products = cart.products;
+        res
+            .status(200)
+            .json({ mesage: `Productos del carrito ${cart.cid}`, products });
+    } else {
+        res.status(404).json({ mesage: "cart not found" });
+    }
+});
 
-
-/* GetById */
-router.get('/:pid', (req, res) => {
-    let { pid } = req.params;
-    let purch = cm.getPurchaseById(parseInt(pid));
-    res.json(purch)
-})
-
-/* Agregar producto */
-router.post('/:pid', (req, res) => {
-    const id = req.params.id;
-    const cartManager = new CartManager();
-    cartManager.addProductToCart(id, (err) => {
-        if (err) {
-            return res.status(500).send({
-                message: "Error al agregar producto al carrito",
-            });
-        }
-        return res.send({
-            message: "Producto agregado al carrito con éxito",
-        });
+routerCart.post("/:idCart/product/:idProduct", async (req, res) => {
+    const { idCart, idProduct } = req.params;
+    const cart = await cm.addProduct(parseInt(idCart), parseInt(idProduct));
+    res.status(200).json({
+        mesage: `Producto ${idProduct} del carrito ${cart.cid} agregado con exito`,
+        cart,
     });
-})
+});
 
-/* Delete */
-router.delete(('/:pid'), (req, res) => {
-    let { pid } = req.params;
-    let del = cm.deletePurchase(parseInt(pid))
-    res.json(del)
-})
-
-export default router
+export default routerCart;
