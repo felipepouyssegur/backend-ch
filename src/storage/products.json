@@ -1,16 +1,5 @@
 [
   {
-    "title": "Computadora",
-    "description": "Producto de Tecnologia, PC",
-    "price": 300000,
-    "thumbnail": "https://i.ibb.co/VLXzNRj/pc.png",
-    "code": 1000,
-    "stock": 20,
-    "category": "Tecnologia",
-    "status": true,
-    "id": 1
-  },
-  {
     "title": "Monitor",
     "description": "Producto de Tecnologia, Monitor 144hz HD",
     "price": 100000,
@@ -53,5 +42,15 @@
     "category": "Tecnologia",
     "thumbnails": "imagen",
     "id": 5
+  },
+  {
+    "title": "Test",
+    "description": "Producto de Tecnologia, PC",
+    "price": 300000,
+    "code": 1005,
+    "status": true,
+    "stock": 20,
+    "category": "Tecnologia",
+    "id": 6
   }
 ]

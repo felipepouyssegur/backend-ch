@@ -1,7 +1,10 @@
 import fs from "fs";
+import ProductManager from "../clases/ProductManager.js";
 
 export default class CartManager {
-    construct() {
+    construct(productManager) {
+        this.productManager = productManager;
+        this.cart = [];
         // this.cart = [];
         // this.path=path;
     }
@@ -80,5 +83,55 @@ export default class CartManager {
         } catch (error) {
             console.log("→ ERROR: ", error);
         }
+    }
+
+    addProductToCart(id, cb) {
+        // leer el archivo cart.json
+        fs.readFile('./src/storage/cart.json', "utf-8", (err, data) => {
+            if (err) return cb(err);
+            let cart;
+            try {
+                cart = JSON.parse(data);
+            } catch (err) {
+                return cb(err);
+            }
+            // agregar el nuevo producto al carrito
+            cart.products.push(id);
+            // escribir el archivo cart.json
+            fs.writeFile('./src/storage/cart.json', JSON.stringify(cart), cb);
+        });
+    }
+}
+
+
+export class CartManager2 {
+    constructor(path) {
+        this.path = path;
+    }
+
+    async getCart() {
+        if (fs.existsSync(this.path)) {
+            const cart = await fs.promises.readFile(this.path, 'utf-8');
+            return JSON.parse(cart);
+        } else {
+            await fs.writeFile(this.path, '[]');
+            return [];
+        }
+    }
+
+    async addProductToCart(productId) {
+        let cart = await this.getCart();
+        let id = cart.length > 0 ? cart[cart.length - 1].id + 1 : 1;
+
+        const productManager = new ProductManager('./src/routes/products.router.js');
+        const product = await productManager.getProductById(productId);
+        if (!product) {
+            return '❌ Product not found ❌';
+        }
+
+        const item = { id, product };
+        cart.push(item);
+        await fs.promises.writeFile(this.path, JSON.stringify(cart, null, '\t'), 'utf-8');
+        return `✅ Product with id ${productId} added to cart with id ${id} ✅`;
     }
 }

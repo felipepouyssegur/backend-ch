@@ -3,3 +3,4 @@ import { fileURLToPath } from 'url';
 
 export const __dirname = dirname(fileURLToPath(import.meta.url))
 
+console.log('hola')

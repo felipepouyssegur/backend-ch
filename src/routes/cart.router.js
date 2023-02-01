@@ -1,6 +1,7 @@
 import { Router } from "express";
 import CartManager from "../clases/CartManager.js";
 
+
 const cm = new CartManager();
 const router = Router()
 
@@ -20,9 +21,18 @@ router.get('/:pid', (req, res) => {
 
 /* Agregar producto */
 router.post('/:pid', (req, res) => {
-    let { pid } = req.params;
-    let cart = cm.addCart(parseInt(pid))
-    res.json(cart)
+    const id = req.params.id;
+    const cartManager = new CartManager();
+    cartManager.addProductToCart(id, (err) => {
+        if (err) {
+            return res.status(500).send({
+                message: "Error al agregar producto al carrito",
+            });
+        }
+        return res.send({
+            message: "Producto agregado al carrito con éxito",
+        });
+    });
 })
 
 /* Delete */
