@@ -52,5 +52,15 @@
     "stock": 20,
     "category": "Tecnologia",
     "id": 6
+  },
+  {
+    "title": "Pc",
+    "description": "Periferico",
+    "price": 10000,
+    "code": 1000,
+    "status": true,
+    "stock": 30,
+    "category": "Tecnologia",
+    "id": 7
   }
 ]

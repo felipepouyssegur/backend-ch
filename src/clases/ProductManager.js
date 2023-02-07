@@ -6,9 +6,8 @@ export class ProductManager {
         this.path = path;
     }
 
-    async #validateProduct(product) { //Este metodo es unicamente de validacion, por esto esta privado, no debe ser accesible por el usuario
+    async #validateProduct(product) {
         if (
-            //Valido que los campos no esten vacios
             product.category !== "" &&
             product.name !== "" &&
             product.description !== "" &&
@@ -20,7 +19,7 @@ export class ProductManager {
             const products = await this.getProducts();
             let flag = false;
             products.forEach((element) => {
-                if (element.code === product.code) { // Valido que no se repita el codigo
+                if (element.code === product.code) {
                     flag = true;
                     return false;
                 }
@@ -65,7 +64,7 @@ export class ProductManager {
 
     async deleteProduct(id) {
         const products = await this.getProducts();
-        const newProducts = products.filter((product) => product.id !== id); //Creo un nuevo array con los productos sin el que se desea borrar y sobreescribo el .json
+        const newProducts = products.filter((product) => product.id !== id);
         await fs.promises.writeFile(this.path, JSON.stringify(newProducts));
         return "Producto eliminado con exito";
     }
