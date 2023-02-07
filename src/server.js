@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }))
 
 /* SOCKET IO */
 
-app.use(express.static(__dirname + '/public'))
+app.use(express.static(__dirname + 'public'))
 
 
 
@@ -27,7 +27,7 @@ app.use(express.static(__dirname + '/public'))
 
 app.engine('handlebars', handlebars.engine())
 app.set('view engine', 'handlebars')
-app.set('views', __dirname + '/src/views')
+app.set('views', __dirname + '/views')
 
 
 
