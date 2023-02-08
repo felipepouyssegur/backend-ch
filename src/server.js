@@ -3,8 +3,9 @@ import { Server } from 'socket.io'
 import { __dirname } from './utils.js'
 import handlebars from 'express-handlebars'
 
-/* import productsRouter from './src/routes/products.router.js';
-import cartRouter from './src/routes/cart.router.js' */
+import productsRouter from './routes/products.router.js';
+import cartRouter from './routes/cart.router.js'
+import viewsRouter from './routes/views.router.js'
 
 
 
@@ -36,17 +37,22 @@ app.set('views', __dirname + '/views')
 
 /* ROUTER */
 
-/* app.use('/api/products', productsRouter)
+app.use('/api/products', productsRouter)
 app.use('/api/cart', cartRouter)
- */
+app.use('/', viewsRouter)
+
+
 
 /* SERVER */
 
 
 app.get('/', (req, res) => {
-    res.render('websocket')
+    res.render('home')
 })
 
+app.get('/realtimeproducts', (req, res) => {
+    res.render('realTimeProducts')
+})
 
 
 const httpServer = app.listen(8080, () => {
@@ -56,13 +62,18 @@ const httpServer = app.listen(8080, () => {
     console.log('-----------------------------------------------------------------------')
 })
 
-const socketServer = new Server(httpServer)
+export const socketServer = new Server(httpServer)
 
 socketServer.on('connection', socket => {
 
-    console.log('Usuario conectado.')
+    console.log('✅ Cliente conectado.')
+    console.log('🛅 Su ID es:', socket.id)
 
-    console.log(socket.id)
+    socket.on('disconnect', () => {
+        console.log('⛔ Cliente desconectado')
+    })
+
+
 
 })
 

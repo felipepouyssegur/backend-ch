@@ -1,5 +1,4 @@
 import fs from 'fs';
-/* import { Product } from "./Product.js"; */
 
 export class ProductManager {
     constructor(path) {

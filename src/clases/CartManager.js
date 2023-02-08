@@ -1,6 +1,6 @@
 import fs from "fs";
 
-class CartManager {
+export class CartManager {
     constructor(path) {
         this.path = path;
     }
