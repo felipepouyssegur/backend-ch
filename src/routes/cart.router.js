@@ -50,17 +50,12 @@ router.post("/:idCart/product/:idProduct", async (req, res) => {
         }
 
         // Check if the product is already in the cart
-        const itemIndex = cart.products.findIndex(
-            (item) => item.product === idProduct
-
-        );
+        const itemIndex = cart.products.findIndex((item) => item.id === idProduct);
 
         if (itemIndex > -1) {
             cart.products[itemIndex].quantity += 1;
-            console.log(itemIndex)
         } else {
-            cart.products.push({ product: idProduct, quantity: 1 });
-            console.log(itemIndex)
+            cart.products.push({ id: idProduct, quantity: 1 });
         }
 
         // Update the cart
