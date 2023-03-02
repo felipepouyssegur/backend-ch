@@ -69,17 +69,41 @@ export const socketServer = new Server(httpServer)
 
 socketServer.on('connection', socket => {
 
+
+
     console.log('✅ Cliente conectado.')
+
     console.log('🛅 Su ID es:', socket.id)
 
+
+
+    socket.on('chatmessage', (msg) => {
+
+        console.log(`Message received: ${msg.user}: ${msg.message}`);
+
+        const obj = {
+
+            user: msg.user,
+
+            message: msg.message
+
+        }
+
+        socket.emit('chat', obj);
+
+    });
+
+
+
     socket.on('disconnect', () => {
+
         console.log('⛔ Cliente desconectado')
+
     })
 
 
 
 })
-
 
 
 

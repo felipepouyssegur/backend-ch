@@ -21,3 +21,27 @@ socketClient.on('chat message', (msg) => {
     console.log(`Message received: ${msg.user}: ${msg.message}`);
     socketClient.emit('chat message', msg);
 });
+
+socketClient.on("chat", (e) => {
+
+    chat.innerHTML = "";
+
+    render(e)
+
+})
+
+const render = (e) => {
+
+    let div = document.createElement("div");
+
+    div.innerHTML = `
+
+      <p>${e.user}:</p>
+
+      <p>${e.message}</p>
+
+      `;
+
+    chat.appendChild(div);
+
+};
