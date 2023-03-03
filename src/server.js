@@ -9,7 +9,8 @@ import cartRouter from './routes/cart.router.js'
 import viewsRouter from './routes/views.router.js'
 
 
-
+import ChatManager from "./dao/mongoManagers/ChatManager.js";
+const cm = new ChatManager()
 
 const app = express()
 
@@ -36,6 +37,7 @@ app.set('views', __dirname + '/views')
 app.use('/api/products', productsRouter)
 app.use('/api/cart', cartRouter)
 app.use('/', viewsRouter)
+
 
 
 
@@ -91,6 +93,12 @@ socketServer.on('connection', socket => {
 
         socket.emit('chat', obj);
 
+        /* guardo el mensaje en la db */
+        cm.addMessage(obj.user, obj.message,);
+
+        const messages = cm.getAllMessages();
+        socket.emit('allMessages', messages);
+        console.log(messages)
     });
 
 
