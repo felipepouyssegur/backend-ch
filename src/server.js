@@ -79,7 +79,7 @@ socketServer.on('connection', socket => {
 
 
 
-    socket.on('chatmessage', (msg) => {
+    socket.on('chatmessage', async (msg) => {
 
         console.log(`Message received: ${msg.user}: ${msg.message}`);
 
@@ -96,9 +96,9 @@ socketServer.on('connection', socket => {
         /* guardo el mensaje en la db */
         cm.addMessage(obj.user, obj.message,);
 
-        const messages = cm.getAllMessages();
+        const messages = await cm.getAllMessages();
         socket.emit('allMessages', messages);
-        console.log(messages)
+
     });
 
 
