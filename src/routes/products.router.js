@@ -14,13 +14,29 @@ const pm = new ProductManager();
 
 /* getProducts para mostrar todos mis productos */
 router.get('/', async (req, res) => {
-    const products = await pm.getAllProducts()
-    if (products.lenght < 0) {
-        res.json({ message: 'No hay productos disponibles.' })
-    } else {
-        res.json({ message: 'Estos son tus productos', products })
+    const { page = 1, limit = 10, sort, status, category } = req.query;
+    let filter = {};
+    let sortOrder = {};
+
+    if (status) {
+        filter.status = status === 'true';
     }
-})
+
+    if (category) {
+        filter.category = category;
+    }
+
+    if (sort) {
+        if (sort === 'descendente') {
+            sortOrder = { price: -1 };
+        } else if (sort === 'ascendente') {
+            sortOrder = { price: 1 };
+        }
+    }
+
+    const products = await productsModel.paginate(filter, { limit, page, sort: sortOrder });
+    res.json({ products });
+});
 
 
 /* getProductsById, verifico que exista id*/
@@ -78,5 +94,26 @@ router.delete('/:idProducts', async (req, res) => {
         res.status(500).json({ message: "Error al eliminar el producto" });
     }
 });
+
+/* pagination */
+
+router.get('/pagination', async (req, res) => {
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export default router
 

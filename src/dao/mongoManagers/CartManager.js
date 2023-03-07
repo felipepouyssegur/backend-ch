@@ -34,4 +34,14 @@ export default class CartManager {
     }
 
 
+    async getCartById(id) {
+        try {
+            const cart = await cartsModel.findById(id).populate('products.id')
+            return cart
+        } catch (error) {
+            console.log(error)
+            return error
+        }
+    }
+
 }

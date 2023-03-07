@@ -1,0 +1,14 @@
+{{!-- products.handlebars --}}
+{{#each products}}
+<h1>{{name}}</h1>
+<img src="{{thumbnail}}" alt="product thumbnail">
+<p>{{description}}</p>
+<p>Precio: ${{price}}</p>
+<p>Categoría: {{category}}</p>
+<p>Stock disponible: {{stock}}</p>
+
+<form action="/api/cart/63f4fa9b4cd3e35106fcc3ed/product/{{_id}}" method="post">
+    <input type="hidden" name="_method" value="post">
+    <button type="submit">Agregar al carrito</button>
+</form>
+{{/each}}
