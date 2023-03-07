@@ -111,6 +111,22 @@ router.delete('/:idCart/products/:idProduct', async (req, res) => {
     }
 });
 
+/* Actualizo productos con un nuevo array */
+
+router.put('/:idCart', async (req, res) => {
+    try {
+        const cart = await cartsModel.findByIdAndUpdate(
+            req.params.idCart,
+            { products: req.body },
+            { new: true }
+        )
+        res.send(cart)
+    } catch (error) {
+        console.error(error)
+        res.status(500).send('Error updating cart')
+    }
+})
+
 /* Actualizar quantity de producto especifico */
 
 router.put('/:idCart/products/:idProduct', async (req, res) => {
