@@ -1,11 +1,13 @@
-{{!-- products.handlebars --}}
+
+{{#if isAdmin}}
+<p style="font-weight: 1000;">Este usuario es admin</p>
+{{/if}}
+
+
 <form action="/logout" method="post">
     <input type="submit" value="Logout" class="submit"/>
 </form>
 
-{{#if isAdmin}}
-<p>Administrator</p>
-{{/if}}
 
 {{#each products}}
 <h1>{{name}}</h1>

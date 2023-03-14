@@ -65,7 +65,21 @@ router.get('/products', async (req, res) => {
 
     const productosObtenidos = productsFormatted.slice(0, limit);
 
-    res.render('products', { products: productosObtenidos, layout: "main" });
+    const user = req.user; // Obtiene el usuario actual de la sesión
+
+    let isAdmin = false; // Define isAdmin como falso por defecto
+
+    if (user && user.role === 'admin') {
+        isAdmin = true; // Si el usuario es admin, cambia el valor de isAdmin a verdadero
+    }
+
+
+    res.render('products', {
+        products: productosObtenidos,
+        user: user,
+        isAdmin: isAdmin, // Agrega el valor de isAdmin a la vista
+        layout: "main"
+    });
 });
 
 
@@ -146,7 +160,7 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-/* Admin */
+/* CREAR Admin */
 
 router.get('/setup', async (req, res) => {
     const exists = await userModel.exists({ username: "adminCoder@coder.com" });
@@ -164,7 +178,8 @@ router.get('/setup', async (req, res) => {
 
             const newAdmin = new userModel({
                 username: "adminCoder@coder.com",
-                password: hash
+                password: hash,
+                role: 'admin'
             });
 
             newAdmin.save();
