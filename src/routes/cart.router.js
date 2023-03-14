@@ -31,43 +31,30 @@ router.get('/:cartId', async (req, res) => {
 
 /* Agrego un producto al carrito deseado */
 
-router.post("/:idCart/product/:idProduct", async (req, res) => {
+// Eliminar un producto especifico del carrito
+router.delete('/:idCart/products/:idProduct', async (req, res) => {
     try {
         const { idCart, idProduct } = req.params;
 
-        // Check if the cart exists
         const cart = await cartsModel.findById(idCart);
         if (!cart) {
-            return res.status(404).json({ message: "Cart not found" });
+            return res.status(404).json({ message: "Carrito no encontrado, por favor ingresar un ID valido." });
         }
 
-        // Check if the product exists
-        const product = await productsModel.findById(idProduct);
-        if (!product) {
-            return res.status(404).json({ message: "Product not found" });
+        const productIndex = cart.products.findIndex(p => p._id == idProduct);
+        if (productIndex === -1) {
+            return res.status(404).json({ message: "Producto no encontrado en el carrito" });
         }
 
-        // Check if the product is already in the cart
-        const itemIndex = cart.products.findIndex((item) => item.id.equals(idProduct));
+        cart.products.splice(productIndex, 1);
+        await cart.save();
 
-        if (itemIndex > -1) {
-            cart.products[itemIndex].quantity += 1;
-        } else {
-            cart.products.push({ id: product._id, quantity: 1 });
-        }
-
-        // Update the cart
-        const updatedCart = await cartsModel.findByIdAndUpdate(idCart, cart, {
-            new: true,
-        });
-
-        res.status(200).json(updatedCart);
+        res.json({ message: "Producto eliminado del carrito" });
     } catch (error) {
         console.error(error);
-        res.status(500).send("Error adding product to cart");
+        res.status(500).json({ message: "Internal server error" });
     }
 });
-
 
 
 

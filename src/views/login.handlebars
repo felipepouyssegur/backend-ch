@@ -1,0 +1,23 @@
+<div class="app">
+<form action="/login" method="post">
+    <div>
+        {{#if error}}
+        <p class="err-msg">El nombre de usuario o contraseña es incorrecto.</p>
+        {{/if }}
+        <h1>Login</h1>
+    </div>
+    <div class="form-group">
+        <label>Usuario: </label>
+        <input type="text" name="username" id="username" placeholder="Ingresar su nombre de usuario." required />
+    </div>
+    <div class="form-group">
+        <label>Contraseña:</label>
+        <input type="password" name="password" id="password" placeholder="Ingresar su contraseña." required />
+    </div>
+    <div>
+        <input type="submit" value="Login" />
+    </div>
+
+    <h5>No tenes una cuenta? <a href="/signup">Registrate ya</a></h5> 
+    </form>
+</div>

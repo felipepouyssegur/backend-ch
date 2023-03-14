@@ -3,14 +3,18 @@ import { Server } from 'socket.io'
 import { __dirname } from './utils.js'
 import handlebars from 'express-handlebars'
 import './dao/dbConfig.js'
-
 import productsRouter from './routes/products.router.js';
 import cartRouter from './routes/cart.router.js'
 import viewsRouter from './routes/views.router.js'
-
-
 import ChatManager from "./dao/mongoManagers/ChatManager.js";
+import session from 'express-session';
+import passport from 'passport';
+import bcrypt from 'bcrypt'
+import localStrategy from 'passport-local';
+import { userModel } from './dao/models/users.models.js'
+
 const cm = new ChatManager()
+
 
 const app = express()
 
@@ -21,8 +25,12 @@ app.use(express.static(__dirname + '/public'))
 
 /* SIEMPRE TENGO QUE PONER ESTO CON EXPRESS (PARA QUE ENTIENDA CUALQUIER FORMATO) */
 app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-
+app.use(express.urlencoded({ extended: false }))
+app.use(session({
+    secret: 'verygoodsecret', /* deberia estar en ENV en una app real */
+    resave: false,
+    saveUninitialized: true
+}))
 
 
 /* Handlebars */
@@ -30,6 +38,9 @@ app.engine('handlebars', handlebars.engine())
 app.set('view engine', 'handlebars')
 app.set('views', __dirname + '/views')
 
+
+app.use(passport.initialize());
+app.use(passport.session())
 
 
 /* ROUTER */
@@ -39,24 +50,49 @@ app.use('/api/cart', cartRouter)
 app.use('/', viewsRouter)
 
 
+/* passport */
 
+
+passport.serializeUser(function (user, done) {
+    done(null, user.id);
+})
+
+passport.deserializeUser(function (id, done) {
+    userModel.findById(id, function (err, user) {
+        done(err, user)
+    })
+})
+
+
+passport.use(new localStrategy(function (username, password, done) {
+    userModel.findOne({ username: username }, function (err, user) {
+        if (err) return done(err)
+        if (!user) return done(null, false, { message: 'Nombre de usuario incorrecto.' })
+
+        bcrypt.compare(password, user.password, function (err, res) {
+            if (err) return done(err)
+
+            if (res === false) {
+                return done(null, false, { message: 'Contraseña incorrecta.' })
+            }
+
+            return done(null, user)
+        })
+    })
+}))
+
+export function isLoggedIn(req, res, next) {
+    if (req.isAuthenticated()) return next();
+    res.redirect('/login')
+}
+
+/* si el usuario intenta volver a login no puede, ya que inicio sesion */
+export function isLoggedOut(req, res, next) {
+    if (!req.isAuthenticated()) return next();
+    res.redirect('/products')
+}
 
 /* SERVER */
-
-
-app.get('/', (req, res) => {
-    res.render('home')
-})
-
-app.get('/chat', (req, res) => {
-    res.render('chat')
-
-})
-
-app.get('/realtimeproducts', (req, res) => {
-    res.render('realTimeProducts')
-})
-
 
 
 const PORT = process.env.PORT || 3000

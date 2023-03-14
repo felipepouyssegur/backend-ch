@@ -95,11 +95,6 @@ router.delete('/:idProducts', async (req, res) => {
     }
 });
 
-/* pagination */
-
-router.get('/pagination', async (req, res) => {
-
-})
 
 
 

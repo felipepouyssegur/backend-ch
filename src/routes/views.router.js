@@ -2,7 +2,11 @@ import ProductManager from '../dao/mongoManagers/ProductManager.js'
 import { Router } from 'express'
 import { cartsModel } from '../dao/models/carts.model.js';
 import { productsModel } from '../dao/models/products.model.js';
-import { socketServer } from '../server.js';
+import { isLoggedIn, isLoggedOut, socketServer } from '../server.js';
+import { } from '../server.js';
+import { userModel } from '../dao/models/users.models.js';
+import bcrypt from 'bcrypt'
+import passport from 'passport';
 
 
 const router = new Router()
@@ -10,7 +14,7 @@ const pm = new ProductManager();
 
 
 // Vista para ser utilizada con protocolo http, layout home,
-router.get('/', async (req, res) => {
+/* router.get('/', async (req, res) => {
     const { limit } = req.query;
     const products = await pm.getAllProducts();
 
@@ -25,7 +29,7 @@ router.get('/', async (req, res) => {
     const productosObtenidos = productsFormatted.slice(0, limit);
 
     res.render('home', { products: productosObtenidos, layout: "main" });
-});
+}); */
 
 // Vista para ser utilizada con protocolo WebSocket, layout home
 router.get('/realtimeproducts', async (req, res) => {
@@ -84,4 +88,111 @@ router.get('/cart/:idCart', async (req, res) => {
         res.status(500).send('Error retrieving cart');
     }
 });
+
+
+/* Sign up */
+
+router.get('/', isLoggedIn, (req, res) => {
+    res.render('signup', { title: 'Home' })
+})
+
+/* Login */
+
+router.get('/login', isLoggedOut, (req, res) => {
+    const response = {
+        title: 'Login',
+        error: req.query.error
+    }
+
+    res.render('login', response)
+})
+
+router.post('/login', passport.authenticate('local', {
+    successRedirect: '/products',
+    failureRedirect: '/login?error=true'
+}))
+
+router.post('/logout', function (req, res, next) {
+    req.logout(function (err) {
+        if (err) { return next(err); }
+        res.redirect('/');
+    });
+});
+
+/* registro */
+
+router.get('/signup', isLoggedOut, (req, res) => {
+    res.render('signup', { title: 'Sign up' })
+})
+
+router.post('/signup', async (req, res) => {
+    const { username, password } = req.body;
+    try {
+        const existingUser = await userModel.findOne({ username });
+        if (existingUser) {
+            return res.status(400).send('Username already exists');
+        }
+        const hash = await bcrypt.hash(password, 10);
+
+        const newUser = new userModel({
+            username,
+            password: hash,
+        });
+        await newUser.save();
+        res.redirect('/login');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error registering user');
+    }
+});
+
+/* Admin */
+
+router.get('/setup', async (req, res) => {
+    const exists = await userModel.exists({ username: "adminCoder@coder.com" });
+
+    if (exists) {
+        console.log('Ya existe un admin.')
+        res.redirect('/login');
+        return;
+    };
+
+    bcrypt.genSalt(10, function (err, salt) {
+        if (err) return next(err);
+        bcrypt.hash("adminCod3r123", salt, function (err, hash) {
+            if (err) return next(err);
+
+            const newAdmin = new userModel({
+                username: "adminCoder@coder.com",
+                password: hash
+            });
+
+            newAdmin.save();
+
+            res.redirect('/login');
+        });
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export default router

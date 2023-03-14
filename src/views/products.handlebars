@@ -1,4 +1,12 @@
 {{!-- products.handlebars --}}
+<form action="/logout" method="post">
+    <input type="submit" value="Logout" class="submit"/>
+</form>
+
+{{#if isAdmin}}
+<p>Administrator</p>
+{{/if}}
+
 {{#each products}}
 <h1>{{name}}</h1>
 <img src="{{thumbnail}}" alt="product thumbnail">
@@ -7,7 +15,7 @@
 <p>Categoría: {{category}}</p>
 <p>Stock disponible: {{stock}}</p>
 
-<form action="/api/cart/63f4fa9b4cd3e35106fcc3ed/product/{{_id}}" method="post">
+<form action="/api/cart/63f4fa9b4cd3e35106fcc3ed/products/{{_id}}" method="post">
     <input type="hidden" name="_method" value="post">
     <button type="submit">Agregar al carrito</button>
 </form>
