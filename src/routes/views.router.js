@@ -67,21 +67,28 @@ router.get('/products', async (req, res) => {
 
     const user = req.user; // Obtiene el usuario actual de la sesión
 
+    let userWithOwnProperty = null;
+    if (user) {
+        // Agregar una propiedad "own property" username al objeto user
+        userWithOwnProperty = { ...user, username: user.username };
+    }
+
     let isAdmin = false; // Define isAdmin como falso por defecto
 
     if (user && user.role === 'admin') {
         isAdmin = true; // Si el usuario es admin, cambia el valor de isAdmin a verdadero
     }
 
+    const welcomeMessage = user ? `Welcome, ${user.username}!` : '';
 
     res.render('products', {
         products: productosObtenidos,
-        user: user,
-        isAdmin: isAdmin, // Agrega el valor de isAdmin a la vista
-        layout: "main"
+        user: userWithOwnProperty,
+        isAdmin: isAdmin,
+        welcomeMessage: welcomeMessage,
+        layout: "main",
     });
 });
-
 
 /* Cart */
 
