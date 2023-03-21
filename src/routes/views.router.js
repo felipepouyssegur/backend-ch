@@ -7,6 +7,14 @@ import { } from '../server.js';
 import { userModel } from '../dao/models/users.models.js';
 import bcrypt from 'bcrypt'
 import passport from 'passport';
+import { Strategy as GitHubStrategy } from "passport-github2";
+import { config } from 'dotenv';
+
+
+
+
+config()
+
 
 
 const router = new Router()
@@ -166,6 +174,40 @@ router.post('/signup', async (req, res) => {
         res.status(500).send('Error registering user');
     }
 });
+
+
+/* Registro con GITHUB */
+
+passport.use(new GitHubStrategy({
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/auth/github/callback"
+},
+    function (accessToken, refreshToken, profile, done) {
+        // Aquí debes crear una nueva instancia de UserModel con los datos del usuario
+        // y guardarla en la base de datos utilizando el método create de Mongoose
+        const user = new userModel({
+            username: profile.username,
+            password: profile.username,
+            role: 'user'
+        });
+        user.save((err) => {
+            if (err) {
+                return done(err);
+            }
+            done(null, user);
+        });
+    }));
+
+router.get('/auth/github',
+    passport.authenticate('github', { scope: ['user:email'] }));
+
+router.get('/auth/github/callback',
+    passport.authenticate('github', { failureRedirect: '/login' }),
+    function (req, res) {
+        // Si el usuario se ha autenticado correctamente, redirigirlo a la página /products
+        res.redirect('/products');
+    });
 
 /* CREAR Admin */
 
