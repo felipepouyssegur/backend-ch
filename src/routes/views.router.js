@@ -2,42 +2,25 @@ import ProductManager from '../dao/mongoManagers/ProductManager.js'
 import { Router } from 'express'
 import { cartsModel } from '../dao/models/carts.model.js';
 import { productsModel } from '../dao/models/products.model.js';
-import { isLoggedIn, isLoggedOut, socketServer } from '../server.js';
+import { isLoggedIn, isLoggedOut } from '../passport/passportStrategies.js';
 import { } from '../server.js';
 import { userModel } from '../dao/models/users.models.js';
 import bcrypt from 'bcrypt'
 import passport from 'passport';
 import { Strategy as GitHubStrategy } from "passport-github2";
 import { config } from 'dotenv';
+import { generateToken } from '../utils.js';
+import { jwtValidation } from '../middlewares/jwt.middleware.js';
+import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser'
 
-
-
+const secretKey = 'mi-clave-secreta'
 
 config()
-
-
 
 const router = new Router()
 const pm = new ProductManager();
 
-
-// Vista para ser utilizada con protocolo http, layout home,
-/* router.get('/', async (req, res) => {
-    const { limit } = req.query;
-    const products = await pm.getAllProducts();
-
-    // Convert ObjectId properties to strings
-    const productsFormatted = products.map(product => {
-        return {
-            ...product.toObject(),
-            _id: product._id.toString()
-        };
-    });
-
-    const productosObtenidos = productsFormatted.slice(0, limit);
-
-    res.render('home', { products: productosObtenidos, layout: "main" });
-}); */
 
 // Vista para ser utilizada con protocolo WebSocket, layout home
 router.get('/realtimeproducts', async (req, res) => {
@@ -155,19 +138,31 @@ router.get('/signup', isLoggedOut, (req, res) => {
 })
 
 router.post('/signup', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, email, age, first_name, last_name } = req.body;
     try {
         const existingUser = await userModel.findOne({ username });
         if (existingUser) {
             return res.status(400).send('Username already exists');
+        }
+        const existingEmail = await userModel.findOne({ email });
+        if (existingEmail) {
+            return res.status(400).send('Email already exists');
         }
         const hash = await bcrypt.hash(password, 10);
 
         const newUser = new userModel({
             username,
             password: hash,
+            first_name,
+            last_name,
+            email,
+            age
         });
+
+
         await newUser.save();
+        const token = jwt.sign({ user: newUser.username }, 'secretJWT', { expiresIn: '1h' })
+        res.cookie('token', token, { httpOnly: true, maxAge: 3600000 })
         res.redirect('/login');
     } catch (error) {
         console.error(error);
@@ -189,6 +184,10 @@ passport.use(new GitHubStrategy({
         const user = new userModel({
             username: profile.username,
             password: profile.username,
+            first_name: profile.username,
+            last_name: profile.username,
+            age: 0,
+            email: profile.username,
             role: 'user'
         });
         user.save((err) => {
@@ -206,6 +205,8 @@ router.get('/auth/github/callback',
     passport.authenticate('github', { failureRedirect: '/login' }),
     function (req, res) {
         // Si el usuario se ha autenticado correctamente, redirigirlo a la página /products
+        const token = jwt.sign({ user: newUser.username }, 'secretJWT', { expiresIn: '1h' })
+        res.cookie('token', token, { httpOnly: true, maxAge: 3600000 })
         res.redirect('/products');
     });
 

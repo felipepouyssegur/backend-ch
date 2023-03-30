@@ -3,15 +3,14 @@ import { Server } from 'socket.io'
 import { __dirname } from './utils.js'
 import handlebars from 'express-handlebars'
 import './dao/dbConfig.js'
+import './passport/passportStrategies.js'
 import productsRouter from './routes/products.router.js';
 import cartRouter from './routes/cart.router.js'
 import viewsRouter from './routes/views.router.js'
 import ChatManager from "./dao/mongoManagers/ChatManager.js";
 import session from 'express-session';
 import passport from 'passport';
-import bcrypt from 'bcrypt'
-import localStrategy from 'passport-local';
-import { userModel } from './dao/models/users.models.js'
+import cookieParser from 'cookie-parser'
 
 const cm = new ChatManager()
 
@@ -31,6 +30,7 @@ app.use(session({
     resave: false,
     saveUninitialized: true
 }))
+app.use(cookieParser())
 
 
 /* Handlebars */
@@ -53,44 +53,7 @@ app.use('/', viewsRouter)
 /* passport */
 
 
-passport.serializeUser(function (user, done) {
-    done(null, user.id);
-})
 
-passport.deserializeUser(function (id, done) {
-    userModel.findById(id, function (err, user) {
-        done(err, user)
-    })
-})
-
-
-passport.use(new localStrategy(function (username, password, done) {
-    userModel.findOne({ username: username }, function (err, user) {
-        if (err) return done(err)
-        if (!user) return done(null, false, { message: 'Nombre de usuario incorrecto.' })
-
-        bcrypt.compare(password, user.password, function (err, res) {
-            if (err) return done(err)
-
-            if (res === false) {
-                return done(null, false, { message: 'Contraseña incorrecta.' })
-            }
-
-            return done(null, user)
-        })
-    })
-}))
-
-export function isLoggedIn(req, res, next) {
-    if (req.isAuthenticated()) return next();
-    res.redirect('/login')
-}
-
-/* si el usuario intenta volver a login no puede, ya que inicio sesion */
-export function isLoggedOut(req, res, next) {
-    if (!req.isAuthenticated()) return next();
-    res.redirect('/products')
-}
 
 /* SERVER */
 
