@@ -3,13 +3,10 @@ import { productsModel } from "../dao/models/products.model.js";
 /* import { ProductManager } from '../dao/fileManagers/ProductManager.js'; */
 import ProductManager from '../dao/mongoManagers/ProductManager.js'
 
-
-
 const router = Router()
 
 
 const pm = new ProductManager();
-
 
 
 /* getProducts para mostrar todos mis productos */

@@ -7,6 +7,7 @@ import './passport/passportStrategies.js'
 import productsRouter from './routes/products.router.js';
 import cartRouter from './routes/cart.router.js'
 import viewsRouter from './routes/views.router.js'
+import messagesRouter from './routes/messages.router.js'
 import ChatManager from "./dao/mongoManagers/ChatManager.js";
 import session from 'express-session';
 import passport from 'passport';
@@ -48,11 +49,7 @@ app.use(passport.session())
 app.use('/api/products', productsRouter)
 app.use('/api/cart', cartRouter)
 app.use('/', viewsRouter)
-
-
-/* passport */
-
-
+app.use('/mensaje', messagesRouter)
 
 
 /* SERVER */
@@ -84,11 +81,8 @@ socketServer.on('connection', socket => {
         console.log(`Message received: ${msg.user}: ${msg.message}`);
 
         const obj = {
-
             user: msg.user,
-
             message: msg.message
-
         }
 
         socket.emit('chat', obj);
@@ -100,17 +94,11 @@ socketServer.on('connection', socket => {
         socket.emit('allMessages', messages);
 
     });
-
-
-
     socket.on('disconnect', () => {
 
         console.log('⛔ Cliente desconectado')
 
     })
-
-
-
 })
 
 

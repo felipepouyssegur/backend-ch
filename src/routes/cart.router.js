@@ -31,6 +31,9 @@ router.get('/:cartId', async (req, res) => {
 
 /* Agrego un producto al carrito deseado */
 
+
+
+
 // Eliminar un producto especifico del carrito
 router.delete('/:idCart/products/:idProduct', async (req, res) => {
     try {
@@ -55,7 +58,6 @@ router.delete('/:idCart/products/:idProduct', async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 });
-
 
 
 

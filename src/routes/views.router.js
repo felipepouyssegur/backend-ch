@@ -205,7 +205,7 @@ router.get('/auth/github/callback',
     passport.authenticate('github', { failureRedirect: '/login' }),
     function (req, res) {
         // Si el usuario se ha autenticado correctamente, redirigirlo a la página /products
-        const token = jwt.sign({ user: newUser.username }, 'secretJWT', { expiresIn: '1h' })
+        const token = jwt.sign({ user: 'usuario' }, 'secretJWT', { expiresIn: '1h' })
         res.cookie('token', token, { httpOnly: true, maxAge: 3600000 })
         res.redirect('/products');
     });
