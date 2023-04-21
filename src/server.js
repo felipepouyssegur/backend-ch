@@ -40,6 +40,9 @@ app.set('view engine', 'handlebars')
 app.set('views', __dirname + '/views')
 
 
+
+
+
 app.use(passport.initialize());
 app.use(passport.session())
 

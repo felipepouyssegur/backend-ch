@@ -31,8 +31,39 @@ router.get('/:cartId', async (req, res) => {
 
 /* Agrego un producto al carrito deseado */
 
+router.post("/:idCart/products/:idProduct", async (req, res) => {
+    try {
+        const { idCart, idProduct } = req.params;
+        // Check if the cart exists
+        const cart = await cartsModel.findById(idCart);
+        if (!cart) {
+            return res.status(404).json({ message: "Cart not found" });
+        }
 
+        // Check if the product exists
+        const product = await productsModel.findById(idProduct);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
 
+        // Check if the product is already in the cart
+        const itemIndex = cart.products.findIndex((item) => item.id.equals(idProduct));
+
+        if (itemIndex > -1) {
+            cart.products[itemIndex].quantity += 1;
+        } else {
+            cart.products.push({ name: product.name, id: product._id, quantity: 1 });
+        }
+
+        // Save the updated cart in the database
+        const updatedCart = await cart.save();
+
+        res.json(updatedCart);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
 
 // Eliminar un producto especifico del carrito
 router.delete('/:idCart/products/:idProduct', async (req, res) => {

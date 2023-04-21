@@ -61,7 +61,7 @@ router.get('/products', async (req, res) => {
     let userWithOwnProperty = null;
     if (user) {
         // Agregar una propiedad "own property" username al objeto user
-        userWithOwnProperty = { ...user, username: user.username };
+        userWithOwnProperty = { ...user, username: user.username, cart: user.cart };
     }
 
     let isAdmin = false; // Define isAdmin como falso por defecto
@@ -122,7 +122,8 @@ router.get('/login', isLoggedOut, (req, res) => {
 router.post('/login', passport.authenticate('local', {
     successRedirect: '/products',
     failureRedirect: '/login?error=true'
-}))
+}
+))
 
 router.post('/logout', function (req, res, next) {
     req.logout(function (err) {
@@ -150,18 +151,25 @@ router.post('/signup', async (req, res) => {
         }
         const hash = await bcrypt.hash(password, 10);
 
+        const cart = new cartsModel({ products: [] });
+        const savedCart = await cart.save();
+
+
         const newUser = new userModel({
             username,
             password: hash,
             first_name,
             last_name,
             email,
-            age
+            age,
+            cart: savedCart._id
         });
 
 
         await newUser.save();
         const token = jwt.sign({ user: newUser.username }, 'secretJWT', { expiresIn: '1h' })
+
+        res.status(200).json({ user: userData, cartId: savedCart._id });
         res.cookie('token', token, { httpOnly: true, maxAge: 3600000 })
         res.redirect('/login');
     } catch (error) {
