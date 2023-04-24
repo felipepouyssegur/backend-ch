@@ -59,10 +59,16 @@ router.get('/products', async (req, res) => {
     const user = req.user; // Obtiene el usuario actual de la sesión
 
     let userWithOwnProperty = null;
+    let cart = null
     if (user) {
         // Agregar una propiedad "own property" username al objeto user
-        userWithOwnProperty = { ...user, username: user.username, cart: user.cart };
+        const userCart = user.cart.toString() // Convertir ObjectId a string
+        userWithOwnProperty = { ...user, username: user.username, cart: userCart };
+        console.log(userCart)
     }
+
+
+
 
     let isAdmin = false; // Define isAdmin como falso por defecto
 
