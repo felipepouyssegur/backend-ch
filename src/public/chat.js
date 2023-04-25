@@ -7,24 +7,27 @@ const formulario = document.getElementById('formulario');
 const input = document.getElementById('mensaje');
 const messages = document.getElementById('messages');
 
-formulario.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    if (input.value) {
-        socketClient.emit('chatmessage', { user: usuario, message: input.value });
-        input.value = '';
-    }
+socketClient.on('connect', (req, res) => {
+    formulario.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        if (input.value) {
+            socketClient.emit('chatmessage', { user: usuario, message: input.value });
+            input.value = '';
+        }
+    });
+
 });
 
-
 // Handle incoming messages
+socketClient.on('chat', (message) => {
+    render(message);
+});
 
 socketClient.on('allMessages', (messages) => {
     messages.forEach((message) => {
         render(message);
     });
 });
-
-
 
 const render = (e) => {
     if (renderedMessages.has(e._id)) { // Verifica si el mensaje ya se ha renderizado

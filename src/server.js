@@ -8,15 +8,20 @@ import productsRouter from './routes/products.router.js';
 import cartRouter from './routes/cart.router.js'
 import viewsRouter from './routes/views.router.js'
 import messagesRouter from './routes/messages.router.js'
+import chatRouter from './routes/chat.router.js'
 import ChatManager from "./dao/mongoManagers/ChatManager.js";
 import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser'
+import methodOverride from 'method-override'
+
+
 
 const cm = new ChatManager()
 
 
 const app = express()
+app.use(methodOverride('_method'));
 
 /* archivos estaticos en public */
 app.use(express.static(__dirname + '/public'))
@@ -32,6 +37,7 @@ app.use(session({
     saveUninitialized: true
 }))
 app.use(cookieParser())
+
 
 
 /* Handlebars */
@@ -52,6 +58,7 @@ app.use(passport.session())
 app.use('/api/products', productsRouter)
 app.use('/api/cart', cartRouter)
 app.use('/', viewsRouter)
+app.use('/chat', chatRouter)
 app.use('/mensaje', messagesRouter)
 
 
@@ -103,6 +110,7 @@ socketServer.on('connection', socket => {
 
     })
 })
+
 
 
 

@@ -52,58 +52,59 @@ router.get('/:idProducts', async (req, res) => {
 
 /* Add product */
 router.post('/', async (req, res) => {
-    const productInfo = req.body
-    const newProduct = await pm.addProduct(productInfo)
-    res.json({ message: 'Producto creado con exito', newProduct })
+    try {
+        const newProduct = await pm.addProduct(req.body);
+        res.json({ message: 'Producto creado con éxito', newProduct });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al crear el producto' });
+    }
 });
 
 
 
 /* Modify product */
-router.put('/:idProducts', async (req, res) => {
+router.post('/:idProducts', async (req, res) => {
     const { idProducts } = req.params;
-    const field = Object.keys(req.body)[0];
-    const value = req.body[field];
+    const updateFields = req.body;
 
     try {
-        const product = await productsModel.findByIdAndUpdate(idProducts, { [field]: value }, { new: true });
-        res.json({ message: "Producto editado correctamente", product });
+        const product = await productsModel.findById(idProducts);
+        if (!product) {
+            return res.status(404).json({ message: "Producto no encontrado" });
+        }
+
+        for (const [key, value] of Object.entries(updateFields)) {
+            product[key] = value;
+        }
+
+        const updatedProduct = await product.save();
+        res.json({ message: "Producto editado correctamente", product: updatedProduct });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al editar el producto" });
     }
 });
 
-/* Delete specific id */
 
-router.delete('/:idProducts', async (req, res) => {
-    const { idProducts } = req.params;
+/* Delete specific id */
+/* Estoy usando method-override, por eso el router.post y no router.delete */
+
+router.post('/delete/:id', async (req, res) => {
+    const { id } = req.params;
 
     try {
-        const product = await productsModel.findByIdAndDelete(idProducts);
-        if (product) {
-            res.json({ message: `Producto con ID ${idProducts} eliminado correctamente.` });
+        const deletedProduct = await productsModel.findByIdAndDelete(id);
+        if (deletedProduct) {
+            res.json({ message: `Producto con ID ${id} eliminado correctamente.` });
         } else {
-            res.status(404).json({ message: `No se encontró el producto con ID ${idProducts}.` });
+            res.status(404).json({ message: `No se encontró el producto con ID ${id}.` });
         }
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al eliminar el producto" });
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

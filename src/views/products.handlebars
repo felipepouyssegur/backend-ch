@@ -1,10 +1,40 @@
 
 {{#if user}}
-<p>Bienvenido/a {{user.username}}!</p>
+<h2>Bienvenido/a {{user.username}}!</h2>
+{{/if}}
+
 {{#if isAdmin}}
-<p>Sos admin!!!</p>
+<form action="/api/products" method="POST">
+    <label for="name">Nombre:</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="price">Precio:</label>
+    <input type="number" id="price" name="price" required>
+
+    <label for="description">Descripción:</label>
+    <input type="text" id="description" name="description" required>
+
+    <label for="thumbnail">Thumbnail:</label>
+    <input type="text" id="thumbnail" name="thumbnail" required>
+
+    <label for="stock">Stock:</label>
+    <input type="number" id="stock" name="stock" required>
+
+    <label for="category">Categoría:</label>
+    <input type="text" id="category" name="category" required>
+
+    <label for="status">Estado:</label>
+    <select id="status" name="status">
+        <option value="true">Activo</option>
+        <option value="false">Inactivo</option>
+    </select>
+
+    <button type="submit">Crear Producto</button>
+</form>
+
+
 {{/if}}
-{{/if}}
+
 
 
 <form action="/logout" method="post">
@@ -20,11 +50,53 @@
 <p>Categoría: {{category}}</p>
 <p>Stock disponible: {{stock}}</p>
 
-    
-<form action="/api/cart/6446e0eb3dd91f25592ae233/products/{{_id}}" method="post">
+<form action="/api/cart/{{../user.cart}}/products/{{_id}}" method="post">
     <input type="hidden" name="_method" value="post">
     <button type="submit">Agregar al carrito</button>
 </form>
+<br>
+{{#if ../isAdmin}}
+<form action="/api/products/delete/{{_id}}" method="POST">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit">BORRAR PRODUCTO</button>
+</form>
+
+
+
+<form action="/api/products/{{_id}}" method="POST">
+<input type="hidden" name="_method" value="PUT">
+<p><strong>Se deben completar todos los campos.</strong> </p>
+    <label for="name">Nombre:</label>
+    <input type="text" id="name" name="name">
+    
+    <label for="price">Precio:</label>
+    <input type="number" id="price" name="price">
+    
+    <label for="description">Descripción:</label>
+    <input type="text" id="description" name="description">
+    
+    <label for="thumbnail">Thumbnail:</label>
+    <input type="text" id="thumbnail" name="thumbnail">
+    
+    <label for="stock">Stock:</label>
+    <input type="number" id="stock" name="stock">
+    
+    <label for="category">Categoría:</label>
+    <input type="text" id="category" name="category">
+    
+    <label for="status">Estado:</label>
+    <select id="status" name="status">
+        <option value="true">Activo</option>
+        <option value="false">Inactivo</option>
+    </select>
+    
+    <button type="submit">Actualizar Producto</button>
+</form>
+{{/if}}
+
+
 
 {{/each}}
+
+
 

@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { cartsModel } from "../dao/models/carts.model.js";
 import { productsModel } from "../dao/models/products.model.js";
-
+import TicketManager from "../dao/mongoManagers/TicketManager.js";
 import CartManager from "../dao/mongoManagers/CartManager.js"
+
 
 const router = Router();
 const cm = new CartManager();
@@ -180,26 +181,65 @@ router.put('/:idCart/products/:idProduct', async (req, res) => {
 
 /* Elimino todos los productos del cart */
 
-router.delete('/:idCart', async (req, res) => {
-    try {
-        const { idCart } = req.params;
+/* Finalizo Compra */
+const tm = new TicketManager()
 
-        const cart = await cartsModel.findById(idCart);
+router.post('/:cid/purchase', async (req, res) => {
+    console.log(req.user)
+    try {
+        const cart = await cartsModel.findById(req.params.cid);
         if (!cart) {
-            return res.status(404).json({ message: "Cart not found" });
+            return res.status(404).json({ message: 'Carrito no encontrado' });
         }
 
-        cart.products = []; // Elimina todos los productos del carrito
+        // Verificar si hay suficiente stock para cada producto en el carrito
+        const unavailableProducts = [];
+        for (let i = 0; i < cart.products.length; i++) {
+            const product = cart.products[i];
+            const dbProduct = await productsModel.findById(product.id);
+            if (!dbProduct) {
+                return res.status(404).json({ message: 'Producto no encontrado' });
+            }
+            if (dbProduct.stock < product.quantity) {
+                // Agregar el producto al array de productos no disponibles
+                unavailableProducts.push({ id: product.id, name: dbProduct.name });
+                // Actualizar la cantidad de productos en el carrito igual a la cantidad de stock disponible
+                product.quantity = dbProduct.stock;
+                dbProduct.stock = 0;
+                await dbProduct.save();
+            } else {
+                // Restar el stock del producto y continuar con la compra
+                dbProduct.stock -= product.quantity;
+                await dbProduct.save();
+            }
+        }
+
+        // Filtrar los productos del carrito para eliminar aquellos con una cantidad igual a cero
+        cart.products = cart.products.filter(product => product.quantity > 0);
         await cart.save();
 
-        res.json({ message: "Productos del carrito eliminados exitosamente" });
+        if (unavailableProducts.length > 0) {
+            return res.status(400).json({ message: 'No hay suficiente stock para algunos productos en el carrito', unavailableProducts });
+        }
 
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal server error" });
+        // Calcular el monto total de la compra
+        let totalAmount = 0;
+        for (let i = 0; i < cart.products.length; i++) {
+            const product = cart.products[i];
+            const dbProduct = await productsModel.findById(product.id);
+            totalAmount += dbProduct.price * product.quantity;
+        }
+
+        // Crear un ticket con los datos de la compra
+
+        const ticket = await tm.createTicket(cart, totalAmount);
+
+        return res.status(200).json({ message: 'Compra realizada exitosamente', ticket });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error al procesar la compra' });
     }
 });
-
 
 
 export default router;

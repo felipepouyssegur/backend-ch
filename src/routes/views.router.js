@@ -3,7 +3,6 @@ import { Router } from 'express'
 import { cartsModel } from '../dao/models/carts.model.js';
 import { productsModel } from '../dao/models/products.model.js';
 import { isLoggedIn, isLoggedOut } from '../passport/passportStrategies.js';
-import { } from '../server.js';
 import { userModel } from '../dao/models/users.models.js';
 import bcrypt from 'bcrypt'
 import passport from 'passport';
@@ -42,7 +41,9 @@ router.get('/realtimeproducts', async (req, res) => {
 
 /* Products */
 
+
 router.get('/products', async (req, res) => {
+
     const { limit } = req.query;
     const products = await pm.getAllProducts();
 
@@ -62,7 +63,7 @@ router.get('/products', async (req, res) => {
     let cart = null
     if (user) {
         // Agregar una propiedad "own property" username al objeto user
-        const userCart = user.cart.toString() // Convertir ObjectId a string
+        const userCart = user.cart // Convertir ObjectId a string
         userWithOwnProperty = { ...user, username: user.username, cart: userCart };
         console.log(userCart)
     }
@@ -175,7 +176,7 @@ router.post('/signup', async (req, res) => {
         await newUser.save();
         const token = jwt.sign({ user: newUser.username }, 'secretJWT', { expiresIn: '1h' })
 
-        res.status(200).json({ user: userData, cartId: savedCart._id });
+        /* res.status(200).json({ user: userData, cartId: savedCart._id }); */
         res.cookie('token', token, { httpOnly: true, maxAge: 3600000 })
         res.redirect('/login');
     } catch (error) {

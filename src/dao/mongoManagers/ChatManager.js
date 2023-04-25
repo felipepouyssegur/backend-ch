@@ -12,7 +12,7 @@ export default class ChatManager {
 
     async getAllMessages() {
         try {
-            const messages = await chatModel.find();
+            const messages = await chatModel.find().sort({ message: -1 });
             return messages;
         } catch (error) {
             return error;
