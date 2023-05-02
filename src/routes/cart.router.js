@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { cartsModel } from "../dao/models/carts.model.js";
 import { productsModel } from "../dao/models/products.model.js";
+import { ErrorsName, ErrorsMessage, ErrorsCause } from "../utils/errors/errors.enum.js";
 import TicketManager from "../dao/mongoManagers/TicketManager.js";
 import CartManager from "../dao/mongoManagers/CartManager.js"
 import CustomError from "../utils/errors/CustomError.js";
@@ -38,14 +39,14 @@ router.post("/:idCart/products/:idProduct", async (req, res) => {
         // Check if the cart exists
         const cart = await cartsModel.findById(idCart);
         if (!cart) {
-            throw CustomError.createCustomError({ name: 'Error al agregar producto en el carrito', cause: 'Carrito no encontrado', message: 'Request failed.' })
+            throw CustomError.createCustomError({ name: ErrorsName.PRODUCT_DATA_INCOMPLETE, cause: ErrorsName.PRODUCT_DATA_INCOMPLETE, message: ErrorsMessage.PRODUCT_DATA_INCOMPLETE })
             /* res.status(404).json({ message: "Cart not found" }); */
         }
 
         // Check if the product exists
         const product = await productsModel.findById(idProduct);
         if (!product) {
-            throw CustomError.createCustomError({ name: 'Error al agregar producto en el carrito', cause: 'Producto no encontrado', message: 'Request failed.' })
+            throw CustomError.createCustomError({ name: ErrorsName.PRODUCT_DATA_INCOMPLETE, cause: ErrorsName.PRODUCT_DATA_INCOMPLETE, message: ErrorsMessage.PRODUCT_DATA_INCOMPLETE })
             /* res.status(404).json({ message: "Product not found" }); */
         }
 
