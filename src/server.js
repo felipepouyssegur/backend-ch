@@ -9,12 +9,14 @@ import cartRouter from './routes/cart.router.js'
 import viewsRouter from './routes/views.router.js'
 import messagesRouter from './routes/messages.router.js'
 import chatRouter from './routes/chat.router.js'
+import fakerRouter from './routes/faker.router.js'
 import ChatManager from "./dao/mongoManagers/ChatManager.js";
 import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser'
 import methodOverride from 'method-override'
 
+import { errorMiddleware } from './utils/errors/errors.middleware.js'
 
 
 const cm = new ChatManager()
@@ -57,6 +59,7 @@ app.use(passport.session())
 
 app.use('/api/products', productsRouter)
 app.use('/api/cart', cartRouter)
+app.use('/mockingproducts', fakerRouter)
 app.use('/', viewsRouter)
 app.use('/chat', chatRouter)
 app.use('/mensaje', messagesRouter)
@@ -66,6 +69,8 @@ app.use('/mensaje', messagesRouter)
 
 
 const PORT = process.env.PORT || 3000
+
+app.use(errorMiddleware)
 
 const httpServer = app.listen(PORT, () => {
     console.log('-----------------------------------------------------------------------')
@@ -110,6 +115,7 @@ socketServer.on('connection', socket => {
 
     })
 })
+
 
 
 

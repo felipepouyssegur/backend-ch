@@ -3,7 +3,7 @@ import { cartsModel } from "../dao/models/carts.model.js";
 import { productsModel } from "../dao/models/products.model.js";
 import TicketManager from "../dao/mongoManagers/TicketManager.js";
 import CartManager from "../dao/mongoManagers/CartManager.js"
-
+import CustomError from "../utils/errors/CustomError.js";
 
 const router = Router();
 const cm = new CartManager();
@@ -38,13 +38,15 @@ router.post("/:idCart/products/:idProduct", async (req, res) => {
         // Check if the cart exists
         const cart = await cartsModel.findById(idCart);
         if (!cart) {
-            return res.status(404).json({ message: "Cart not found" });
+            throw CustomError.createCustomError({ name: 'Error al agregar producto en el carrito', cause: 'Carrito no encontrado', message: 'Request failed.' })
+            /* res.status(404).json({ message: "Cart not found" }); */
         }
 
         // Check if the product exists
         const product = await productsModel.findById(idProduct);
         if (!product) {
-            return res.status(404).json({ message: "Product not found" });
+            throw CustomError.createCustomError({ name: 'Error al agregar producto en el carrito', cause: 'Producto no encontrado', message: 'Request failed.' })
+            /* res.status(404).json({ message: "Product not found" }); */
         }
 
         // Check if the product is already in the cart
@@ -62,7 +64,7 @@ router.post("/:idCart/products/:idProduct", async (req, res) => {
         res.json(updatedCart);
     } catch (error) {
         console.log(error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(200).json({ message: "Internal server error" });
     }
 });
 

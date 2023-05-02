@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/felipepouyssegur/backend-ch#readme",
   "dependencies": {
+    "@faker-js/faker": "^7.6.0",
     "@handlebars/allow-prototype-access": "^1.0.5",
     "bcrypt": "^5.1.0",
     "cookie-parser": "^1.4.6",

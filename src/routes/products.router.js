@@ -2,11 +2,14 @@ import { Router } from "express";
 import { productsModel } from "../dao/models/products.model.js";
 /* import { ProductManager } from '../dao/fileManagers/ProductManager.js'; */
 import ProductManager from '../dao/mongoManagers/ProductManager.js'
+import { faker } from '@faker-js/faker';
+
 
 const router = Router()
 
 
 const pm = new ProductManager();
+
 
 
 /* getProducts para mostrar todos mis productos */
@@ -34,6 +37,9 @@ router.get('/', async (req, res) => {
     const products = await productsModel.paginate(filter, { limit, page, sort: sortOrder });
     res.json({ products });
 });
+
+
+
 
 
 /* getProductsById, verifico que exista id*/
@@ -105,6 +111,8 @@ router.post('/delete/:id', async (req, res) => {
         res.status(500).json({ message: "Error al eliminar el producto" });
     }
 });
+
+
 
 
 
