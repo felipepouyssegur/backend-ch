@@ -5,6 +5,7 @@ import { ErrorsName, ErrorsMessage, ErrorsCause } from "../utils/errors/errors.e
 import TicketManager from "../dao/mongoManagers/TicketManager.js";
 import CartManager from "../dao/mongoManagers/CartManager.js"
 import CustomError from "../utils/errors/CustomError.js";
+import logger from "../utils/winston.js";
 
 const router = Router();
 const cm = new CartManager();
@@ -18,7 +19,7 @@ router.post("/", async (req, res) => {
         const savedCart = await cart.save();
         res.status(200).json(savedCart._id);
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).send("Error creating cart");
     }
 });
@@ -64,7 +65,7 @@ router.post("/:idCart/products/:idProduct", async (req, res) => {
 
         res.json(updatedCart);
     } catch (error) {
-        console.log(error);
+        logger.error(error);
         res.status(200).json({ message: "Internal server error" });
     }
 });
@@ -89,7 +90,7 @@ router.delete('/:idCart/products/:idProduct', async (req, res) => {
 
         res.json({ message: "Producto eliminado del carrito" });
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ message: "Internal server error" });
     }
 });
@@ -130,7 +131,7 @@ router.delete('/:idCart/products/:idProduct', async (req, res) => {
 
         res.json({ message: "Producto eliminado del carrito" });
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ message: "Server error" });
     }
 });
@@ -146,7 +147,7 @@ router.put('/:idCart', async (req, res) => {
         )
         res.send(cart)
     } catch (error) {
-        console.error(error)
+        logger.error(error)
         res.status(500).send('Error updating cart')
     }
 })
@@ -177,7 +178,7 @@ router.put('/:idCart/products/:idProduct', async (req, res) => {
 
         res.json({ message: "Cantidad de producto incrementada" });
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ message: "Internal server error" });
     }
 });
@@ -188,7 +189,7 @@ router.put('/:idCart/products/:idProduct', async (req, res) => {
 const tm = new TicketManager()
 
 router.post('/:cid/purchase', async (req, res) => {
-    console.log(req.user)
+    logger.info(req.user)
     try {
         const cart = await cartsModel.findById(req.params.cid);
         if (!cart) {
@@ -239,7 +240,7 @@ router.post('/:cid/purchase', async (req, res) => {
 
         return res.status(200).json({ message: 'Compra realizada exitosamente', ticket });
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         res.status(500).json({ message: 'Error al procesar la compra' });
     }
 });

@@ -9,12 +9,14 @@ import cartRouter from './routes/cart.router.js'
 import viewsRouter from './routes/views.router.js'
 import messagesRouter from './routes/messages.router.js'
 import chatRouter from './routes/chat.router.js'
+import loggerRouter from './routes/logger.router.js'
 import fakerRouter from './routes/faker.router.js'
 import ChatManager from "./dao/mongoManagers/ChatManager.js";
 import session from 'express-session';
 import passport from 'passport';
 import cookieParser from 'cookie-parser'
 import methodOverride from 'method-override'
+import logger from './utils/winston.js'
 
 import { errorMiddleware } from './utils/errors/errors.middleware.js'
 
@@ -63,6 +65,7 @@ app.use('/mockingproducts', fakerRouter)
 app.use('/', viewsRouter)
 app.use('/chat', chatRouter)
 app.use('/mensaje', messagesRouter)
+app.use('/loggerTest', loggerRouter)
 
 
 /* SERVER */
@@ -73,10 +76,12 @@ const PORT = process.env.PORT || 3000
 app.use(errorMiddleware)
 
 const httpServer = app.listen(PORT, () => {
-    console.log('-----------------------------------------------------------------------')
-    console.info('      ✅ El servidor esta corriendo en: http://localhost:3000')
-    console.warn('      🔊 Escuchando el puerto 3000')
-    console.log('-----------------------------------------------------------------------')
+    logger.debug('-----------------------------------------------------------------------')
+    logger.info('      ✅ El servidor esta corriendo en: http://localhost:3000')
+    logger.info('      🔊 Escuchando el puerto 3000')
+    logger.debug('-----------------------------------------------------------------------')
+
+
 })
 
 export const socketServer = new Server(httpServer)
@@ -85,15 +90,15 @@ socketServer.on('connection', socket => {
 
 
 
-    console.log('✅ Cliente conectado.')
+    logger.info('✅ Cliente conectado.')
 
-    console.log('🛅 Su ID es:', socket.id)
+    logger.info('🛅 Su ID es:', socket.id)
 
 
 
     socket.on('chatmessage', async (msg) => {
 
-        console.log(`Message received: ${msg.user}: ${msg.message}`);
+        logger.info(`Message received: ${msg.user}: ${msg.message}`);
 
         const obj = {
             user: msg.user,
