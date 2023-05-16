@@ -8,7 +8,7 @@ const router = Router()
 
 router.get('/', async (req, res) => {
     await transporter.sendMail({
-        from: 'CODERHOUSE',
+        from: 'resetpassword@gmail.com',
         to: 'pipe071951@gmail.com',
         subject: 'PRUEBA CODERHOUSE',
         /* text: 'Mi primer mail :D!' */

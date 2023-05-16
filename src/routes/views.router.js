@@ -12,6 +12,7 @@ import { generateToken } from '../utils.js';
 import { jwtValidation } from '../middlewares/jwt.middleware.js';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser'
+import { transporter } from "../nodemailer.js";
 
 const secretKey = 'mi-clave-secreta'
 
@@ -254,24 +255,83 @@ router.get('/setup', async (req, res) => {
     });
 });
 
+/* reset password */
 
+router.get('/reset-password', (req, res) => {
+    res.render('resetPassword')
+})
 
+router.post('/reset-password', async (req, res) => {
+    const { email } = req.body; // Obtiene el correo electrónico enviado desde el formulario
 
+    try {
+        // Genera el token con una fecha de expiración de 1 hora
+        const token = jwt.sign({ email }, secretKey, { expiresIn: '1h' });
 
+        // Genera el enlace utilizando el token
+        const resetLink = `http://localhost:3000/reset-password/${token}`;
 
+        // Define el contenido del correo electrónico
+        const correoElectronico = {
+            from: 'correo_remitente@gmail.com',
+            to: email,
+            subject: 'Restablecimiento de contraseña',
+            html: `<p>Haga clic en el siguiente enlace para restablecer su contraseña:</p><a href="${resetLink}">${resetLink}</a>`,
+        };
 
+        // Envía el correo electrónico
+        await transporter.sendMail(correoElectronico);
+        console.log('Correo electrónico enviado:', correoElectronico);
 
+        res.send('Correo electrónico enviado correctamente');
+    } catch (error) {
+        console.error('Error al enviar el correo electrónico:', error);
+        res.status(500).send('Error al enviar el correo electrónico');
+    }
+});
 
+router.get('/reset-password/:token', (req, res) => {
+    const { token } = req.params;
+    res.render('resetPasswordForm', { token });
+});
 
+router.post('/reset-password/:token', async (req, res) => {
+    const { token } = req.params;
+    const { password } = req.body;
 
+    try {
+        // Verificar el token sin verificar la expiración
+        const { email } = jwt.verify(token, secretKey, { ignoreExpiration: true });
 
+        // Obtener el usuario por correo electrónico
+        const user = await userModel.findOne({ email });
 
+        // Comparar la nueva contraseña con la contraseña actual
+        const isSamePassword = await bcrypt.compare(password, user.password);
 
+        if (isSamePassword) {
+            return res.status(400).send('No se puede utilizar la misma contraseña');
+        }
 
+        // Generar el hash de la nueva contraseña
+        const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Actualizar la contraseña del usuario en la base de datos
+        user.password = hashedPassword;
+        await user.save();
 
+        res.send('Contraseña actualizada correctamente');
+    } catch (error) {
+        console.error('Error al actualizar la contraseña:', error);
 
+        if (error.name === 'TokenExpiredError') {
+            // Redirigir a una vista donde el usuario pueda generar nuevamente el correo de restablecimiento
+            return res.redirect('/resetPassword');
+        }
 
+        res.status(500).send(`Error al actualizar la contraseña: ${error.message}`);
+    }
+});
 
 
 
