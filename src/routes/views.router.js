@@ -73,21 +73,48 @@ router.get('/products', async (req, res) => {
 
 
     let isAdmin = false; // Define isAdmin como falso por defecto
+    let isPremium = false;
+    let isUser = false
 
-    if (user && user.role === 'admin') {
+    if (user && user.role === 'admin' || user && user.role === 'premium') {
         isAdmin = true; // Si el usuario es admin, cambia el valor de isAdmin a verdadero
     }
-
-    const welcomeMessage = user ? `Welcome, ${user.username}!` : '';
 
     res.render('products', {
         products: productosObtenidos,
         user: userWithOwnProperty,
         isAdmin: isAdmin,
-        welcomeMessage: welcomeMessage,
+        isPremium: isPremium,
+        isUser: isUser,
         layout: "main",
     });
 });
+
+router.put('/api/users/premium/:uid', async (req, res) => {
+    try {
+        const { uid } = req.params; // Obtiene el ID del usuario de los parámetros de la ruta
+        const user = await userModel.findById(uid); // Busca el usuario por su ID en la base de datos
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+
+        // Cambia el rol del usuario
+        user.role = user.role === 'user' ? 'premium' : 'user';
+
+        // Guarda los cambios en la base de datos
+        await user.save();
+
+        res.json({ message: 'Rol de usuario actualizado exitosamente', user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al actualizar el rol de usuario' });
+    }
+
+})
+
+
+
 
 /* Cart */
 

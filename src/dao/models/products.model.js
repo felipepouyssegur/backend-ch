@@ -28,9 +28,17 @@ const productSchema = new mongoose.Schema({
     status: {
         type: Boolean,
         required: true
+    },
+    owner: {
+        type: String,
+        ref: 'User',
+        default: 'admin',
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
     }
-
-})
+});
 
 
 productSchema.plugin(mongoosePaginate)
