@@ -37,19 +37,25 @@ router.get('/:cartId', async (req, res) => {
 router.post("/:idCart/products/:idProduct", async (req, res) => {
     try {
         const { idCart, idProduct } = req.params;
+        const { user } = req; // Obtener el usuario actual
+
         // Check if the cart exists
         const cart = await cartsModel.findById(idCart);
         if (!cart) {
-            throw CustomError.createCustomError({ name: ErrorsName.PRODUCT_DATA_INCOMPLETE, cause: ErrorsName.PRODUCT_DATA_INCOMPLETE, message: ErrorsMessage.PRODUCT_DATA_INCOMPLETE })
-            /* res.status(404).json({ message: "Cart not found" }); */
+            return res.status(404).json({ message: "Cart not found" });
         }
 
         // Check if the product exists
         const product = await productsModel.findById(idProduct);
         if (!product) {
-            throw CustomError.createCustomError({ name: ErrorsName.PRODUCT_DATA_INCOMPLETE, cause: ErrorsName.PRODUCT_DATA_INCOMPLETE, message: ErrorsMessage.PRODUCT_DATA_INCOMPLETE })
-            /* res.status(404).json({ message: "Product not found" }); */
+            return res.status(404).json({ message: "Product not found" });
         }
+
+        // Check if the user is premium and the product belongs to the user
+        if (user.role === "premium" && product.createdBy && product.createdBy.toString() === user._id.toString()) {
+            return res.status(403).json({ message: "No puedes agregar tu propio producto del carrito" });
+        }
+
 
         // Check if the product is already in the cart
         const itemIndex = cart.products.findIndex((item) => item.id.equals(idProduct));
@@ -57,7 +63,12 @@ router.post("/:idCart/products/:idProduct", async (req, res) => {
         if (itemIndex > -1) {
             cart.products[itemIndex].quantity += 1;
         } else {
-            cart.products.push({ name: product.name, id: product._id, quantity: 1 });
+            // Ensure that the product is not created by the user
+            if (product.createdBy.toString() !== user._id.toString()) {
+                cart.products.push({ name: product.name, id: product._id, quantity: 1 });
+            } else {
+                return res.status(403).json({ message: "No puedes agregar tu propio producto al carrito" });
+            }
         }
 
         // Save the updated cart in the database
@@ -65,10 +76,12 @@ router.post("/:idCart/products/:idProduct", async (req, res) => {
 
         res.json(updatedCart);
     } catch (error) {
-        logger.error(error);
-        res.status(200).json({ message: "Internal server error" });
+        console.error(error); // Log the error for debugging purposes
+        res.status(500).json({ message: "Internal server error" });
     }
 });
+
+
 
 // Eliminar un producto especifico del carrito
 router.delete('/:idCart/products/:idProduct', async (req, res) => {

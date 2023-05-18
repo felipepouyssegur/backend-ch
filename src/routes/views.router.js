@@ -80,6 +80,9 @@ router.get('/products', async (req, res) => {
         isAdmin = true; // Si el usuario es admin, cambia el valor de isAdmin a verdadero
     }
 
+
+
+
     res.render('products', {
         products: productosObtenidos,
         user: userWithOwnProperty,
