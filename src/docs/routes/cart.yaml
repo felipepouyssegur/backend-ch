@@ -1,0 +1,316 @@
+swagger: "2.0"
+info:
+  title: API de Carritos
+  description: Documentación de la API de carritos
+  version: 1.0.0
+
+paths:
+  /api/cart:
+    post:
+      summary: Crea un nuevo carrito
+      tags:
+        - Carts
+      responses:
+        200:
+          description: ID del carrito creado
+          schema:
+            type: object
+            properties:
+              cartId:
+                type: string
+        500:
+          description: Error al crear el carrito
+
+  /api/cart/{cartId}:
+    get:
+      summary: Muestra productos dentro del carrito con un ID específico
+      tags:
+        - Carts
+      parameters:
+        - name: cartId
+          in: path
+          description: ID del carrito
+          required: true
+          type: string
+          example: "6442991ea64f27d2e4e4c3c2"
+      responses:
+        200:
+          description: Carrito encontrado exitosamente
+          schema:
+            $ref: "#/components/schemas/Cart"
+        500:
+          description: Error al buscar los productos del carrito
+
+  /api/cart/{idCart}/products/{idProduct}:
+    post:
+      summary: Agrega un producto al carrito (Requiere inicio de sesión)
+      tags:
+        - Carts
+      parameters:
+        - name: idCart
+          in: path
+          description: ID del carrito
+          required: true
+          schema:
+            type: string
+          example: 647636a69b98d5ffaec7f27b
+        - name: idProduct
+          in: path
+          description: ID del producto
+          required: true
+          schema:
+            type: string
+          example: 64661e300038114598e240bc
+      responses:
+        200:
+          description: Producto agregado al carrito exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+        403:
+          description: No puedes agregar tu propio producto al carrito
+        404:
+          description: Carrito no encontrado o producto no encontrado
+        500:
+          description: Error interno del servidor
+
+    delete:
+      summary: Elimina un producto del carrito
+      tags:
+        - Carts
+      parameters:
+        - name: idCart
+          in: path
+          description: ID del carrito
+          required: true
+          schema:
+            type: string
+          example: 647636a69b98d5ffaec7f27b
+        - name: idProduct
+          in: path
+          description: ID del producto
+          required: true
+          schema:
+            type: string
+          example: 64661e300038114598e240bc
+      responses:
+        200:
+          description: Producto eliminado del carrito
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+        404:
+          description: Carrito no encontrado, producto no encontrado o producto no encontrado en el carrito
+        500:
+          description: Error interno del servidor
+
+  /api/cart/{idCart}:
+    put:
+      summary: Actualizar productos del carrito
+      tags:
+        - Carts
+      description: Actualiza los productos de un carrito existente.
+      parameters:
+        - name: idCart
+          in: path
+          description: ID del carrito a actualizar
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Nombre del producto
+                  id:
+                    type: string
+                    description: ID del producto
+                  quantity:
+                    type: integer
+                    description: Cantidad del producto
+      responses:
+        200:
+          description: Carrito actualizado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+        500:
+          description: Error al actualizar el carrito
+
+/api/cart/{idCart}/products/{idProduct}:
+  put:
+    summary: Actualizar cantidad de producto en el carrito
+    tags:
+      - Carts
+    description: Actualiza la cantidad de un producto en un carrito existente.
+    parameters:
+      - name: idCart
+        in: path
+        description: ID del carrito
+        required: true
+        type: string
+      - name: idProduct
+        in: path
+        description: ID del producto
+        required: true
+        type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              quantity:
+                type: integer
+                description: Cantidad del producto
+                minimum: 1
+    responses:
+      200:
+        description: Cantidad de producto actualizada correctamente
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Mensaje de éxito
+      400:
+        description: Cantidad de producto inválida
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Mensaje de error
+      404:
+        description: Carrito o producto no encontrado
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Mensaje de error
+      500:
+        description: Error interno del servidor
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Mensaje de error interno del servidor
+
+/api/cart/{cid}/purchase:
+  post:
+    summary: Procesar compra
+    tags:
+      - Carts
+    description: Procesa una compra en el carrito especificado.
+    parameters:
+      - name: cid
+        in: path
+        description: ID del carrito
+        required: true
+        type: string
+    responses:
+      200:
+        description: Compra realizada exitosamente
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Ticket"
+      400:
+        description: No hay suficiente stock para algunos productos en el carrito
+      404:
+        description: Carrito o producto no encontrado
+      500:
+        description: Error al procesar la compra
+
+components:
+  schemas:
+    Cart:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+              name:
+                type: string
+              id:
+                type: string
+                description: ID del producto
+              quantity:
+                type: integer
+                default: 1
+
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: ID del producto
+        name:
+          type: string
+          description: Nombre del producto
+        price:
+          type: number
+          description: Precio del producto
+        description:
+          type: string
+          description: Descripción del producto
+        thumbnail:
+          type: string
+          description: URL de la imagen del producto
+        stock:
+          type: number
+          description: Cantidad en stock del producto
+        category:
+          type: string
+          description: Categoría del producto
+        status:
+          type: boolean
+          description: Estado del producto
+        owner:
+          type: string
+          description: Propietario del producto
+        createdBy:
+          type: string
+          description: ID del usuario que creó el producto
+
+    Ticket:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Código del ticket
+        purchase_datetime:
+          type: string
+          format: date-time
+          description: Fecha y hora de la compra
+        amount:
+          type: number
+          description: Monto total de la compra
+        purchaser:
+          type: string
+          description: Comprador del ticket

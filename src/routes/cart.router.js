@@ -17,7 +17,7 @@ router.post("/", async (req, res) => {
     try {
         const cart = new cartsModel({ products: [] });
         const savedCart = await cart.save();
-        res.status(200).json(savedCart._id);
+        res.status(200).json(`Carrito creado exitosamente, su id es: ${savedCart._id}`);
     } catch (error) {
         logger.error(error);
         res.status(500).send("Error creating cart");
@@ -84,29 +84,7 @@ router.post("/:idCart/products/:idProduct", async (req, res) => {
 
 
 // Eliminar un producto especifico del carrito
-router.delete('/:idCart/products/:idProduct', async (req, res) => {
-    try {
-        const { idCart, idProduct } = req.params;
 
-        const cart = await cartsModel.findById(idCart);
-        if (!cart) {
-            return res.status(404).json({ message: "Carrito no encontrado, por favor ingresar un ID valido." });
-        }
-
-        const productIndex = cart.products.findIndex(p => p._id == idProduct);
-        if (productIndex === -1) {
-            return res.status(404).json({ message: "Producto no encontrado en el carrito" });
-        }
-
-        cart.products.splice(productIndex, 1);
-        await cart.save();
-
-        res.json({ message: "Producto eliminado del carrito" });
-    } catch (error) {
-        logger.error(error);
-        res.status(500).json({ message: "Internal server error" });
-    }
-});
 
 
 
@@ -120,32 +98,21 @@ router.delete('/:idCart/products/:idProduct', async (req, res) => {
 
         const cart = await cartsModel.findById(idCart);
         if (!cart) {
-            return res.status(404).json({ message: "Carrito no encontrado, por favor ingresar un ID valido." });
+            return res.status(404).json({ message: "Carrito no encontrado, por favor ingresar un ID válido." });
         }
 
-        const product = await productsModel.findById(idProduct);
-        if (!product) {
-            return res.status(404).json({ message: "Producto no encontrado, por favor ingresar un ID valido." });
-        }
-
-        const productIndex = cart.products.findIndex((p) => p.id === idProduct);
-
+        const productIndex = cart.products.findIndex(p => p.id._id == idProduct);
         if (productIndex === -1) {
             return res.status(404).json({ message: "Producto no encontrado en el carrito" });
         }
 
-        if (cart.products[productIndex].quantity === 1) {
-            cart.products.splice(productIndex, 1);
-        } else {
-            cart.products[productIndex].quantity--;
-        }
-
+        cart.products.splice(productIndex, 1);
         await cart.save();
 
         res.json({ message: "Producto eliminado del carrito" });
     } catch (error) {
         logger.error(error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: "Internal server error" });
     }
 });
 
@@ -176,7 +143,7 @@ router.put('/:idCart/products/:idProduct', async (req, res) => {
             return res.status(404).json({ message: "Carrito no encontrado, por favor ingresar un ID valido." });
         }
 
-        const product = cart.products.find(p => p.id === idProduct);
+        const product = cart.products.find(p => p.id.toString() === idProduct);
         if (!product) {
             return res.status(404).json({ message: "Producto no encontrado, por favor ingresar un ID valido." });
         }
@@ -189,7 +156,7 @@ router.put('/:idCart/products/:idProduct', async (req, res) => {
         product.quantity = quantity;
         await cart.save();
 
-        res.json({ message: "Cantidad de producto incrementada" });
+        res.json({ message: "Cantidad de productos modificada." });
     } catch (error) {
         logger.error(error);
         res.status(500).json({ message: "Internal server error" });

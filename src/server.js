@@ -1,6 +1,5 @@
 import express from 'express'
 import { Server } from 'socket.io'
-import { __dirname } from './utils.js'
 import handlebars from 'express-handlebars'
 import './dao/dbConfig.js'
 import './passport/passportStrategies.js'
@@ -17,19 +16,21 @@ import passport from 'passport';
 import cookieParser from 'cookie-parser'
 import methodOverride from 'method-override'
 import logger from './utils/winston.js'
+import swaggerUi from 'swagger-ui-express'
 
 import { errorMiddleware } from './utils/errors/errors.middleware.js'
+import { __dirname } from './utils.js'
+import { swaggerSetup } from './swaggerSpecs.js'
+
 
 
 const cm = new ChatManager()
-
 
 const app = express()
 app.use(methodOverride('_method'));
 
 /* archivos estaticos en public */
 app.use(express.static(__dirname + '/public'))
-
 
 
 /* SIEMPRE TENGO QUE PONER ESTO CON EXPRESS (PARA QUE ENTIENDA CUALQUIER FORMATO) */
@@ -43,14 +44,10 @@ app.use(session({
 app.use(cookieParser())
 
 
-
 /* Handlebars */
 app.engine('handlebars', handlebars.engine())
 app.set('view engine', 'handlebars')
 app.set('views', __dirname + '/views')
-
-
-
 
 
 app.use(passport.initialize());
@@ -66,11 +63,10 @@ app.use('/', viewsRouter)
 app.use('/chat', chatRouter)
 app.use('/mensaje', messagesRouter)
 app.use('/loggerTest', loggerRouter)
-
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSetup))
 
 
 /* SERVER */
-
 
 const PORT = process.env.PORT || 3000
 
