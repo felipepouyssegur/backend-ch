@@ -11,7 +11,7 @@ import chatRouter from './routes/chat.router.js'
 import loggerRouter from './routes/logger.router.js'
 import fakerRouter from './routes/faker.router.js'
 import ChatManager from "./dao/mongoManagers/ChatManager.js";
-import session from 'express-session';
+import session from 'express-session'; process
 import passport from 'passport';
 import cookieParser from 'cookie-parser'
 import methodOverride from 'method-override'

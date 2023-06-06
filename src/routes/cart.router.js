@@ -87,9 +87,6 @@ router.post("/:idCart/products/:idProduct", async (req, res) => {
 
 
 
-
-
-
 /* Elimino el producto seleccionado */
 
 router.delete('/:idCart/products/:idProduct', async (req, res) => {

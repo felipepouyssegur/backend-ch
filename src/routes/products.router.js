@@ -70,8 +70,7 @@ router.get('/:idProducts', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const user = req.user; // Obtener el usuario actual
-
+        const { user } = req.body; // Obtener el usuario actual
         // Verificar el rol del usuario y asignar el propietario en función de ello
         let owner = "admin";
         if (user.role === "premium") {
