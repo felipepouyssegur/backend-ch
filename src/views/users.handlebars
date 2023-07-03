@@ -1,0 +1,33 @@
+<div class="app">
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre de usuario</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each users}}
+            <tr>
+                <td>{{ username }}</td>
+                <td>{{ role }}</td>
+                <td>
+                    <form action="/api/users/admin/{{_id}}" method="POST">
+                        <select name="role">
+                            <option value="user">user</option>
+                            <option value="premium">premium</option>
+                            <option value="admin">admin</option>
+                        </select>
+                        <button type="submit">Actualizar rol</button>
+                    </form>
+                    <form action="/api/users/admin/delete/{{_id}}" method="POST">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>

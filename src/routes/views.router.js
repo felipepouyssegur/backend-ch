@@ -13,7 +13,7 @@ import { jwtValidation } from '../middlewares/jwt.middleware.js';
 import jwt from 'jsonwebtoken';
 import cookieParser from 'cookie-parser'
 import { transporter } from "../nodemailer.js";
-
+import mongoose from 'mongoose';
 const secretKey = 'mi-clave-secreta'
 
 config()
@@ -43,7 +43,7 @@ router.get('/realtimeproducts', async (req, res) => {
 /* Products */
 
 
-router.get('/products', async (req, res) => {
+router.get('/products', isLoggedIn, async (req, res) => {
 
     const { limit } = req.query;
     const products = await pm.getAllProducts();
@@ -80,6 +80,15 @@ router.get('/products', async (req, res) => {
         isAdmin = true; // Si el usuario es admin, cambia el valor de isAdmin a verdadero
     }
 
+    try {
+        const currentTime = new Date();
+        console.log(currentTime)
+        const uid = user._id.toString()
+        await userModel.findByIdAndUpdate(uid, { last_connection: currentTime });
+    } catch (error) {
+        console.log(error)
+    }
+
 
 
 
@@ -93,6 +102,7 @@ router.get('/products', async (req, res) => {
     });
 });
 
+/* duplicate */
 router.put('/api/users/premium/:uid', async (req, res) => {
     try {
         const { uid } = req.params; // Obtiene el ID del usuario de los parámetros de la ruta
@@ -121,23 +131,50 @@ router.put('/api/users/premium/:uid', async (req, res) => {
 
 /* Cart */
 
+
 router.get('/cart/:idCart', async (req, res) => {
+    const { idCart } = req.params;
+
     try {
-        const { idCart } = req.params
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(idCart);
+
+        if (!isValidObjectId) {
+            return res.status(400).send('Invalid cart ID');
+        }
+
         const cart = await cartsModel.findById(idCart);
-        const productDetails = await Promise.all(cart.products.map(async (product) => {
-            const productDetail = await productsModel.findById(product.id);
-            return {
-                ...productDetail.toObject(),
-                quantity: product.quantity,
-            };
-        }));
-        res.render('cart', { products: productDetails });
+
+        if (!cart) {
+            return res.status(404).send('Cart not found');
+        }
+
+        const productDetails = await Promise.all(
+            cart.products.map(async (product) => {
+                const productDetail = await productsModel.findById(product.id);
+
+                if (!productDetail) {
+                    return null;
+                }
+
+                return {
+                    ...productDetail.toObject(),
+                    quantity: product.quantity,
+                };
+            })
+        );
+
+        const filteredProductDetails = productDetails.filter(
+            (productDetail) => productDetail !== null
+        );
+
+        res.render('cart', { products: filteredProductDetails, idCart: idCart, layout: "main" });
     } catch (error) {
         console.error(error);
         res.status(500).send('Error retrieving cart');
     }
 });
+
+
 
 
 /* Sign up */
@@ -160,8 +197,8 @@ router.get('/login', isLoggedOut, (req, res) => {
 router.post('/login', passport.authenticate('local', {
     successRedirect: '/products',
     failureRedirect: '/login?error=true'
-}
-))
+}));
+
 
 router.post('/logout', function (req, res, next) {
     req.logout(function (err) {
@@ -178,7 +215,15 @@ router.get('/signup', isLoggedOut, (req, res) => {
 
 router.post('/signup', async (req, res) => {
     const { username, password, email, age, first_name, last_name } = req.body;
+
+    /* verificacion gmail */
+    const emailRegex = /@gmail\.com$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).send('Invalid email format');
+    }
+
     try {
+
         const existingUser = await userModel.findOne({ username });
         if (existingUser) {
             return res.status(400).send('Username already exists');
@@ -200,7 +245,8 @@ router.post('/signup', async (req, res) => {
             last_name,
             email,
             age,
-            cart: savedCart._id
+            cart: savedCart._id,
+            last_connection: new Date()
         });
 
 

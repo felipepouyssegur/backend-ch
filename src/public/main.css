@@ -2,12 +2,12 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-
     font-family: 'Fira sans', sans-serif;
+
 }
 
 body {
-    background-color: #2F4960;
+    background-color: #2F4960 !important;
     background-image: linear-gradient(to bottom right, #2F4960 10%, #102040);
 }
 
@@ -109,7 +109,7 @@ body {
 }
 
 
-.submit{
+/* .submit{
         appearance: textfield;
         background: white;
         padding-left: 15px;
@@ -119,7 +119,9 @@ body {
         margin-left: 90%;
         outline: none;
         border: none;
-}
+        margin-right: 30px;
+        margin-top: 30px;
+} */
 
 
 .formulario{
@@ -129,3 +131,69 @@ body {
 .logout{
     color: rebeccapurple;
 }
+
+/* products */
+
+.buttons{
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    margin-right: 80px;
+}
+
+.buttons input{
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.buton2{
+    margin-left: 15px;
+}
+
+
+
+h2{
+    margin-top: 30px;
+}
+
+.productimg{
+    height: 200px;
+    width: 200px;
+    margin-bottom: 12px;
+}
+
+
+
+.productflex{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+
+.productflex p {
+    margin-top: 3px;
+}
+
+.agregar-al-carrito{
+    padding: 5px 5px 5px 5px;
+    margin-top: 10px;
+}
+
+.addproductflex{
+    display: flex;
+    justify-content: center;
+
+}
+
+.saludo{
+    margin-top: -30px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+
+

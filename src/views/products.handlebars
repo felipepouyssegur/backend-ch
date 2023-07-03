@@ -1,9 +1,23 @@
 
+
+
+<div class="buttons">
+    <form action="/logout" method="post">
+        <input type="submit" value="Logout" class="submit" />
+    </form>
+    <form action="/cart/{{user.cart}}" method="get">
+        <input type="submit" value="Cart" class="submit buton2" />
+    </form>
+</div>
+
+
+
 {{#if user}}
-<h2>Bienvenido/a {{user.username}}!</h2>
+<h2 class="saludo">Bienvenido/a {{user.username}}!</h2>
 {{/if}}
 
 {{#if isAdmin}}
+<div class="addproductflex">
 <form action="/api/products" method="POST">
     <label for="name">Nombre:</label>
     <input type="text" id="name" name="name" required>
@@ -30,28 +44,23 @@
     </select>
     <button type="submit">Crear Producto</button>
 </form>
+</div>
 {{/if}}
-
-
-
-
-<form action="/logout" method="post">
-    <input type="submit" value="Logout" class="submit"/>
-</form>
 
 
 {{#each products}}
 
-<h1>{{name}}</h1>
-<img src="{{thumbnail}}" alt="product thumbnail">
+<div class="productflex">
+<h2>{{name}}</h2>
+<img src="{{thumbnail}}" alt="product thumbnail" class="productimg">
 <p>{{description}}</p>
 <p>Precio: ${{price}}</p>
 <p>Categoría: {{category}}</p>
-<p>Stock disponible: {{stock}}</p>
+<p>Stock: {{stock}}</p>
 
 <form action="/api/cart/{{../user.cart}}/products/{{_id}}" method="post">
     <input type="hidden" name="_method" value="post">
-    <button type="submit">Agregar al carrito</button>
+    <button type="submit" class="agregar-al-carrito">Agregar al carrito</button>
 </form>
 
 <br>
@@ -93,6 +102,7 @@
     
     <button type="submit">Actualizar Producto</button>
 </form>
+</div>
 
 {{/if}}
 

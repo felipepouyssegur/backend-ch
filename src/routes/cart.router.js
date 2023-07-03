@@ -7,8 +7,10 @@ import CartManager from "../dao/mongoManagers/CartManager.js"
 import CustomError from "../utils/errors/CustomError.js";
 import logger from "../utils/winston.js";
 
+
 const router = Router();
 const cm = new CartManager();
+
 
 
 /* Crea nuevo cart con ID autogenerada, array vacio. */
@@ -37,7 +39,7 @@ router.get('/:cartId', async (req, res) => {
 router.post("/:idCart/products/:idProduct", async (req, res) => {
     try {
         const { idCart, idProduct } = req.params;
-        const { user } = req; // Obtener el usuario actual
+        const { user } = req;
 
         // Check if the cart exists
         const cart = await cartsModel.findById(idCart);
@@ -52,22 +54,35 @@ router.post("/:idCart/products/:idProduct", async (req, res) => {
         }
 
         // Check if the user is premium and the product belongs to the user
-        if (user.role === "premium" && product.createdBy && product.createdBy.toString() === user._id.toString()) {
-            return res.status(403).json({ message: "No puedes agregar tu propio producto del carrito" });
+        if (
+            user.role === "premium" &&
+            product.createdBy &&
+            product.createdBy.toString() === user._id.toString()
+        ) {
+            return res
+                .status(403)
+                .json({ message: "No puedes agregar tu propio producto al carrito" });
         }
 
-
         // Check if the product is already in the cart
-        const itemIndex = cart.products.findIndex((item) => item.id.equals(idProduct));
+        const itemIndex = cart.products.findIndex((item) =>
+            item.id.equals(idProduct)
+        );
 
         if (itemIndex > -1) {
             cart.products[itemIndex].quantity += 1;
         } else {
             // Ensure that the product is not created by the user
             if (product.createdBy.toString() !== user._id.toString()) {
-                cart.products.push({ name: product.name, id: product._id, quantity: 1 });
+                cart.products.push({
+                    name: product.name,
+                    id: product._id,
+                    quantity: 1,
+                });
             } else {
-                return res.status(403).json({ message: "No puedes agregar tu propio producto al carrito" });
+                return res
+                    .status(403)
+                    .json({ message: "No puedes agregar tu propio producto al carrito" });
             }
         }
 
@@ -76,7 +91,7 @@ router.post("/:idCart/products/:idProduct", async (req, res) => {
 
         res.json(updatedCart);
     } catch (error) {
-        console.error(error); // Log the error for debugging purposes
+        console.error(error);
         res.status(500).json({ message: "Internal server error" });
     }
 });
@@ -84,12 +99,44 @@ router.post("/:idCart/products/:idProduct", async (req, res) => {
 
 
 // Eliminar un producto especifico del carrito
+/* uso method override por eso post */
 
+router.post('/:idCart/delete-product/:idProduct', async (req, res) => {
+    try {
+        const { idCart, idProduct } = req.params;
 
+        const cart = await cartsModel.findById(idCart);
+        if (!cart) {
+            return res.status(404).json({ message: "Carrito no encontrado, por favor ingresar un ID válido." });
+        }
+
+        const productIndex = cart.products.findIndex(p => p.id._id == idProduct);
+        if (productIndex === -1) {
+            return res.status(404).json({ message: "Producto no encontrado en el carrito" });
+        }
+
+        const product = cart.products[productIndex];
+        if (product.quantity > 1) {
+            // Si hay más de una unidad del producto, se reduce la cantidad en 1
+            product.quantity -= 1;
+        } else {
+            // Si solo hay una unidad del producto, se elimina del array
+            cart.products.splice(productIndex, 1);
+        }
+
+        await cart.save();
+
+        res.json({ message: "Producto eliminado del carrito" });
+    } catch (error) {
+        logger.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
 
 /* Elimino el producto seleccionado */
+/* uso method override por eso post */
 
-router.delete('/:idCart/products/:idProduct', async (req, res) => {
+router.post('/:idCart/delete-products/:idProduct', async (req, res) => {
     try {
         const { idCart, idProduct } = req.params;
 
@@ -160,15 +207,14 @@ router.put('/:idCart/products/:idProduct', async (req, res) => {
     }
 });
 
-/* Elimino todos los productos del cart */
 
 /* Finalizo Compra */
 const tm = new TicketManager()
 
-router.post('/:cid/purchase', async (req, res) => {
-    logger.info(req.user)
+router.post('/:idCart/purchase', async (req, res) => {
+    const { idCart } = req.params;
     try {
-        const cart = await cartsModel.findById(req.params.cid);
+        const cart = await cartsModel.findById(idCart);
         if (!cart) {
             return res.status(404).json({ message: 'Carrito no encontrado' });
         }
@@ -200,7 +246,7 @@ router.post('/:cid/purchase', async (req, res) => {
         await cart.save();
 
         if (unavailableProducts.length > 0) {
-            return res.status(400).json({ message: 'No hay suficiente stock para algunos productos en el carrito', unavailableProducts });
+            return res.status(400).json({ message: 'Su compra se ha realizado con exito, sin embardo no hay suficiente stock para algunos productos en el carrito', unavailableProducts });
         }
 
         // Calcular el monto total de la compra
@@ -213,7 +259,10 @@ router.post('/:cid/purchase', async (req, res) => {
 
         // Crear un ticket con los datos de la compra
 
-        const ticket = await tm.createTicket(cart, totalAmount);
+        const ticket = await tm.createTicket(cart, totalAmount, req.user.username);
+
+        cart.products = [];
+        await cart.save();
 
         return res.status(200).json({ message: 'Compra realizada exitosamente', ticket });
     } catch (err) {

@@ -12,5 +12,8 @@ export default {
     twilio_sid: process.env.TWILIO_SID,
     twilio_auth_token: process.env.TWILIO_AUTH_TOKEN,
 
+    stripe_public_key: process.env.STRIPE_PUBLIC_KEY,
+    stripe_private_key: process.env.STRIPE_PRIVATE_KEY,
+
     mongo_uri: process.env.MONGO_URI
 }

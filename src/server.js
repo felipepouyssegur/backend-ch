@@ -1,6 +1,7 @@
 import express from 'express'
 import { Server } from 'socket.io'
 import handlebars from 'express-handlebars'
+
 import './dao/dbConfig.js'
 import './passport/passportStrategies.js'
 import productsRouter from './routes/products.router.js';
@@ -10,6 +11,8 @@ import messagesRouter from './routes/messages.router.js'
 import chatRouter from './routes/chat.router.js'
 import loggerRouter from './routes/logger.router.js'
 import fakerRouter from './routes/faker.router.js'
+import paymentRouter from './routes/payment.router.js'
+import userRouter from './routes/users.router.js'
 import ChatManager from "./dao/mongoManagers/ChatManager.js";
 import session from 'express-session'; process
 import passport from 'passport';
@@ -17,6 +20,8 @@ import cookieParser from 'cookie-parser'
 import methodOverride from 'method-override'
 import logger from './utils/winston.js'
 import swaggerUi from 'swagger-ui-express'
+
+import exphbs from 'express-handlebars';
 
 import { errorMiddleware } from './utils/errors/errors.middleware.js'
 import { __dirname } from './utils.js'
@@ -55,15 +60,16 @@ app.use(passport.session())
 
 
 /* ROUTER */
-
+app.use('/', viewsRouter)
 app.use('/api/products', productsRouter)
 app.use('/api/cart', cartRouter)
+app.use('/api/users', userRouter)
 app.use('/mockingproducts', fakerRouter)
-app.use('/', viewsRouter)
 app.use('/chat', chatRouter)
 app.use('/mensaje', messagesRouter)
 app.use('/loggerTest', loggerRouter)
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSetup))
+app.use('/payment', paymentRouter)
 
 
 /* SERVER */
