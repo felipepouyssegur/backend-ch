@@ -264,7 +264,8 @@ router.post('/:idCart/purchase', async (req, res) => {
         cart.products = [];
         await cart.save();
 
-        return res.status(200).json({ message: 'Compra realizada exitosamente', ticket });
+        /* return res.status(200).json({ message: 'Compra realizada exitosamente', ticket }); */
+        return res.render('ticket', { layout: "main", ticket, totalAmount, email: req.user.email, code: ticket.code })
     } catch (err) {
         logger.error(err);
         res.status(500).json({ message: 'Error al procesar la compra' });

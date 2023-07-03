@@ -7,7 +7,7 @@
         <h2>{{name}}</h2>
         <img src="{{thumbnail}}" alt="{{name}} thumbnail" class="cartimg">
         <p>{{description}}</p>
-        <p>Precio: ${{price}}</p>
+        <p>Precio por unidad: ${{price}}</p>
         <p>Categoría: {{category}}</p>
         <p>Cantidad: {{quantity}}</p>
     </li>
@@ -24,16 +24,8 @@
     </form> --}}
 </ul>
 
-<form action="/payment" method="post" id="payment-from">
-    <!-- Aquí van los campos para los detalles de pago -->
-    <input type="hidden" name="cartId" value="{{idCart}}">
-    
-    <input type="text" name="cardNumber" placeholder="Número de tarjeta" required>
-    <input type="text" name="cardExpMonth" placeholder="MM" required>
-    <input type="text" name="cardExpYear" placeholder="AA" required>
-    <input type="text" name="cardCVC" placeholder="CVC" required>
-
-    <input type="submit" value="Finalizar compra" class="submit buton2" />
+<form action="/api/cart/{{idCart}}/purchase" method="POST">
+    <button type="submit">Finalizar Compra</button>
 </form>
 
 {{else}}
@@ -41,39 +33,3 @@
 {{/if}}
 </div>
 
-<script src="https://js.stripe.com/v3/"></script>
-<script>
-   var stripe = Stripe('pk_test_51NNhQ1LuERBNF2NDXtntQ86VOIkfXWY3aKGZz945Cxg2RdOqxvXSCkh85e1SQbUD3NUmwsY290z8chkK5pcuTKNy00WuDCbOlC');
-
-    var paymentForm = document.getElementById('payment-form');
-    paymentForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        // Crea una sesión de pago en el backend y obtiene la URL de redireccionamiento
-        fetch('/payment', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ cartId: {{cartId}} }),
-        })
-            .then(function (response) {
-                return response.json();
-            })
-            .then(function (session) {
-                // Redirecciona al usuario a la página de pago de Stripe
-                return stripe.redirectToCheckout({ sessionId: session.id });
-            })
-            .then(function (result) {
-                if (result.error) {
-                    // Manejo de errores en caso de que ocurra alguno durante el proceso de pago
-                    console.error(result.error);
-                    // Muestra un mensaje de error al usuario
-                }
-            })
-            .catch(function (error) {
-                console.error(error);
-                // Muestra un mensaje de error al usuario
-            });
-    });
-</script>
